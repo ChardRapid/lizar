@@ -22,6 +22,10 @@ public class Key {
 		return (Double)value;
 	}
 	
+	public  boolean _bool(){
+		return (Boolean)value;
+	}
+	
 	public String _str(){
 		return value.toString();
 	}

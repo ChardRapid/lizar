@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import com.lizar.log.Log;
 import com.lizar.log.Logger;
@@ -21,6 +23,7 @@ import com.lizar.util.StringHelper;
 import com.lizar.util.http.Http;
 import com.lizar.web.Controller;
 import com.lizar.web.Web;
+import com.lizar.web.config.Config;
 import com.lizar.web.config.I18Msg;
 import com.lizar.web.loader.I18Resource;
 
@@ -43,6 +46,11 @@ public class EventLoader {
 				cookies.put(c.getName(), c);
 			}
 		}
+		String[] ps=request_path.split("/");
+		this.path=new ArrayList<String>(ps.length);
+		for(String s:ps){
+			if(StringHelper.isNotNull(s))path.add(s);
+		}
 	}
 	
 	public static ServletContext context;
@@ -53,7 +61,11 @@ public class EventLoader {
 	
 	protected HttpServletResponse response;
 	
+	public boolean need_after=true;
+	
 	private  String request_path;
+	
+	private List<String> path;
 	
 	/**
 	 * 
@@ -152,6 +164,11 @@ public class EventLoader {
 	
 	public void request(String file) throws ServletException, IOException{
 		request.getRequestDispatcher(file).forward(request, response);
+		//chain.doFilter(request, response);
+	}
+	
+	public void response_to_root() throws IOException{
+		response.sendRedirect(Config.xpath_str("server_info.root"));
 	}
 	
 	public void response(String url) throws IOException{
@@ -164,6 +181,11 @@ public class EventLoader {
 				response.addCookie(c);
 			}
 		}
+		response.sendRedirect(url);
+	}
+	
+	public void response(String url,Cookie cookie) throws IOException{
+		response.addCookie(cookie);
 		response.sendRedirect(url);
 	}
 	
@@ -188,6 +210,11 @@ public class EventLoader {
 	 * */
 	public String request_path(){
 		return request_path;
+	}
+	
+	public String request_path(int i){
+		if(i>-1&&i<path.size())return path.get(i);
+		return "";
 	}
 	
 	public String real_path(){
@@ -254,13 +281,13 @@ public class EventLoader {
 	 * generate images
 	 * @throws IOException 
 	 */
-	public void write_image(BufferedImage img) throws IOException{
-		ImageIO.write(img, "image/jpeg",response.getOutputStream());
+	public void write_image(BufferedImage img,String image_type) throws IOException{
+		ImageIO.write(img, "JPEG",response.getOutputStream());
 		response.getOutputStream().close();
 		
 	}
 	
-	
+	public static final String JPEG="JPEG";
 	
 	public Cookie get_cookie(String name){
 		if(cookies==null)return null;
@@ -335,7 +362,7 @@ public class EventLoader {
 	 * **/
 	public void encode_params(String encode_type) throws UnsupportedEncodingException{
 		request.setCharacterEncoding(encode_type);
-		response.setCharacterEncoding(encode_type);
+		response.setContentType("text/html;charset="+encode_type);
 	}
 	
 	public String encode_type(){
@@ -343,46 +370,119 @@ public class EventLoader {
 	}
 	
 	public int _int(String key){
-		return param(key, 0);
+		Object v=request.getParameter(key);
+		if(v==null)return 0;
+		else {
+			try{
+				return Integer.parseInt(v.toString());
+			}catch(Exception e){
+				return 0;
+			}
+		}
 	}
 	
 	public int _int(String key,int defv){
-		return param( key, defv);
+		
+		Object v=request.getParameter(key);
+		if(v==null)return defv;
+		else {
+			try{
+				return Integer.parseInt(v.toString());
+			}catch(Exception e){
+				return defv;
+			}
+		}
 	}
 	
 	public String _str(String key){
-		return param( key, "");
+		Object v=request.getParameter(key);
+		if(v==null)return "";
+		else {
+			return v.toString();
+		}
 	}
 	
 	public String _str(String key,String defv){
-		return param(key, defv);
+		Object v=request.getParameter(key);
+		if(v==null)return defv;
+		else {
+			return v.toString();
+		}
 	}
 	
 	public long _long(String key){
-		return param(key,0l);
+		Object v=request.getParameter(key);
+		if(v==null)return 0;
+		else {
+			try{
+				return Long.parseLong(v.toString());
+			}catch(Exception e){
+				return 0;
+			}
+		}
 	}
 	
 	public long _long(String key,long _default){
-		return param(key,_default);
+		Object v=request.getParameter(key);
+		if(v==null)return _default;
+		else {
+			try{
+				return Long.parseLong(v.toString());
+			}catch(Exception e){
+				return _default;
+			}
+		}
 	}
 	
 	public double _double(String key){
-		return param(key,0.0);
+		Object v=request.getParameter(key);
+		if(v==null)return 0;
+		else {
+			try{
+				return Double.parseDouble(v.toString());
+			}catch(Exception e){
+				return 0;
+			}
+		}
 	}
 	
 	public double _double(String key,double _default){
-		return param(key, _default);
+		Object v=request.getParameter(key);
+		if(v==null)return _default;
+		else {
+			try{
+				return Double.parseDouble(v.toString());
+			}catch(Exception e){
+				return _default;
+			}
+		}
 	}
 	
 	public float _float(String key){
-		return param(key,0.0f);
+		Object v=request.getParameter(key);
+		if(v==null)return 0;
+		else {
+			try{
+				return Float.parseFloat(v.toString());
+			}catch(Exception e){
+				return 0;
+			}
+		}
 	}
 	
 	public float _float(String key,float _default){
-		return param(key,_default);
+		Object v=request.getParameter(key);
+		if(v==null)return _default;
+		else {
+			try{
+				return Float.parseFloat(v.toString());
+			}catch(Exception e){
+				return _default;
+			}
+		}
 	}
 	
-	public String[] _params(String key){
+	public String[] params(String key){
 		return request.getParameterValues(key);
 	}
 	
@@ -390,12 +490,28 @@ public class EventLoader {
 		return request.getParameter(key);
 	}
 	
-	public <T> T param(String key,T _default){
+	private <T> T param(String key,T _default){
 		Object v=request.getParameter(key);
 		if(v==null)return _default;
 		else return (T)v;
 	}
 	
+	
+	public String session_id(){
+		return request.getSession().getId();
+	}
+	
+	public HttpSession session(){
+		return request.getSession();
+	}
+	
+	public void setHeader(String key,String value){
+		response.setHeader(key, value);
+	}
+	
+	public void setDateHeader(String key,long value){
+		response.setDateHeader(key, value);
+	}
 	
 	/**
 	 * 

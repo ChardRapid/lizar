@@ -9,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -16,6 +17,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 import com.lizar.HotLoader;
 import com.lizar.json.JList;
 import com.lizar.json.JObject;
@@ -124,22 +126,76 @@ public class FileTool {
 		return (JSON)JSONParser.parse(result);
 	}
 	
-	private static String read_it(File file){
+	public static String read_it(File file){
+		FileInputStream file_input = null;
+		BufferedReader br=null;
+		StringBuilder result=new StringBuilder("");
 		try {
-			FileReader fr = new FileReader(file); 
-			BufferedReader br = new BufferedReader(fr); 
-			StringBuilder result=new StringBuilder("");
+			file_input = new FileInputStream(file); 
+			 InputStreamReader read = new InputStreamReader(file_input);
+			 br = new BufferedReader(read); 
 			String line = br.readLine(); 
 			while(line!=null){
 				result.append(line);
 				line=br.readLine();
 			}
-			return result.toString();
 		} catch (IOException e) {
+			System.err.println("config file read failed. pls check with "+file.toString());
 			e.printStackTrace();
-		}   
-		System.err.println("config file read failed. pls check with "+file.toString());
-        return "";
+		}finally{
+			if(file_input!=null)
+				try {
+					file_input.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if(br!=null)
+				try {
+					br.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+		}
+		return result.toString();
+	}
+	
+	public static String read_it(File file,String encode_type){
+		FileInputStream file_input = null;
+		BufferedReader br=null;
+		StringBuilder result=new StringBuilder("");
+		try {
+			file_input = new FileInputStream(file); 
+			 InputStreamReader read = new InputStreamReader(file_input,encode_type);
+			 br = new BufferedReader(read); 
+			String line = br.readLine(); 
+			while(line!=null){
+				result.append(line);
+				line=br.readLine();
+			}
+		} catch (IOException e) {
+			System.err.println("config file read failed. pls check with "+file.toString());
+			e.printStackTrace();
+		}finally{
+			if(file_input!=null)
+				try {
+					file_input.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			if(br!=null)
+				try {
+					br.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			
+		}
+		return result.toString();
 	}
 
 	/** 
@@ -149,18 +205,19 @@ public class FileTool {
      * @return boolean 
      */ 
    public static void copyFile(String oldPath, String newPath) { 
+	   InputStream inStream =null;
+	   FileOutputStream fs=null;
        try { 
            int bytesum = 0; 
            int byteread = 0; 
            File oldfile = new File(oldPath); 
            if (oldfile.exists()) { 
-               InputStream inStream = new FileInputStream(oldPath); 
-               FileOutputStream fs = new FileOutputStream(newPath); 
+                inStream = new FileInputStream(oldPath); 
+                fs = new FileOutputStream(newPath); 
                byte[] buffer = new byte[1024]; 
                int length; 
                while ( (byteread = inStream.read(buffer)) != -1) { 
                    bytesum += byteread; 
-                   System.out.println(bytesum); 
                    fs.write(buffer, 0, byteread); 
                } 
                inStream.close(); 
@@ -169,6 +226,21 @@ public class FileTool {
        catch (Exception e) { 
            e.printStackTrace(); 
 
+       }finally{
+    	   if(fs!=null)
+			try {
+				fs.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+    	   if(inStream!=null)
+			try {
+				fs.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
        } 
 
    } 
@@ -241,7 +313,7 @@ public class FileTool {
 		   Class c;
 		   try {
 			   c = Class.forName(class_name.replace("/", ".").replace("\\", "."));
-		   } catch (ClassNotFoundException e1) {
+		   } catch (Throwable e1) {
 			   return;
 		   }
 		   if(!c.isInterface() ){

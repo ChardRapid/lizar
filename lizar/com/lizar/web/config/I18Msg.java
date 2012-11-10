@@ -2,8 +2,10 @@ package com.lizar.web.config;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,11 +13,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.lizar.exception.ConfigKeyLoopTooDeep;
-import com.lizar.exception.I18MsgPathIllegal;
 import com.lizar.log.Log;
 import com.lizar.log.Logger;
 import com.lizar.util.FileTool;
 import com.lizar.util.StringHelper;
+import com.lizar.web.Controller;
 import com.lizar.web.loader.I18Resource;
 
 /**
@@ -97,7 +99,7 @@ public class I18Msg {
 	
 	public void persistence() throws IOException{
 		var=Config.xpath_str("muti_language.var");
-		File l=new File(DIR);
+		File l=new File(Config.path_filter(DIR));
 		if(l.isFile()){
 			FileTool.check_dir(l);
 			l=new File(Config.path_filter(DIR+"/i18.txt"));
@@ -228,19 +230,22 @@ public class I18Msg {
 	
 	private I18Resource _load(File _f){
 		Map<String,String> res=new HashMap<String,String>();
-		BufferedReader reader = null;
+		BufferedReader reader=null;
         try {
-            reader = new BufferedReader(new FileReader(_f));
+        	reader = new BufferedReader(new InputStreamReader(new FileInputStream(_f),Controller.encode_type));
             String tempString = null;
             int i=0;
             String[] arr=null;
+            
             while ((tempString = reader.readLine()) != null) {
             	if(!tempString.trim().equals("")&&!tempString.trim().startsWith("#")){
         			arr=tempString.split("=");
         			if(arr.length>2){
         				System.err.println("Muti-Language read line "+i+" error in "+_f.getName()+" file. this line get more than one '='.");
-        			}else{
+        			}else if(arr.length==2){
         				res.put(arr[0], arr[1]);
+        			}else{
+        				log.info("msg:"+tempString+" is not a void  <key=value> format in "+_f.getPath());
         			}
         			i++;
         		}

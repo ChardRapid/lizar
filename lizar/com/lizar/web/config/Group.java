@@ -263,7 +263,18 @@ public class Group {
 		return (Integer)exp.value;
 	}
 	
+	public static int _int(String fullcode){
+		Explain exp=get(fullcode);
+		if(exp==null)throw new GroupCodeIsNotExists(fullcode);
+		return (Integer)exp.value;
+	}
 	
+	
+	public static long _long(String fullcode){
+		Explain exp=get(fullcode);
+		if(exp==null)throw new GroupCodeIsNotExists(fullcode);
+		return (Long)exp.value;
+	}
 	
 	public static long _long(String group,String code){
 		Explain exp=get(group+"."+code);
@@ -278,10 +289,21 @@ public class Group {
 		return (Double)exp.value;
 	}
 	
+	public static double _double(String fullcode){
+		Explain exp=get(fullcode);
+		if(exp==null)throw new GroupCodeIsNotExists(fullcode);
+		return (Double)exp.value;
+	}
 	
 	public static String _str(String group,String code){
 		Explain exp=get(group+"."+code);
 		if(exp==null)throw new GroupCodeIsNotExists(group,code);
+		return (String)exp.value;
+	}
+	
+	public static String _str(String fullcode){
+		Explain exp=get(fullcode);
+		if(exp==null)throw new GroupCodeIsNotExists(fullcode);
 		return (String)exp.value;
 	}
 	

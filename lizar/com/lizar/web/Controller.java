@@ -7,8 +7,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -32,29 +32,82 @@ import com.lizar.web.loader.I18Resource;
 
 /**
  * <p>
- * @task dispatch requests to proper event
+ * @task Intercept and dispatch requests to proper event
  * 
- * @caution1 event's type and priority fields are set to promote retrieval efficiency.
- * @caution2 throws all exceptions
- * @caution3 all redirections happen here
+ * Event handlers with unsupported handle path will not be put into event_handler_map and will not handle request.
+ * 			Unsupported handle path(Event's handle_path field) :
+ * 								1 who is not start with "/"
+ * 								2 who contains illegal chars such as '.'
+ * 								3 null and ""
+ * 								4 multi-"/" such as "/xxx//user"
+ * 
+ * 			Intercepting steps : 
+ * 								1 if a template exists and listens the file type, the handle the request 
+ * 
+ * 								2 if a event handler in minor_event_handler_map can catch the request then handle it.
+ * 
+ * 								3 if all of above fail, get handler from high_event_handler_map
+ * 
+ * 
+ * 			How a request visit path match an event handler in high_event_handler_map:
+ * 								Firstly eliminating postfix like ".json" or "/" of visit path,but visit path is "/" do nothing.
+ * 								Secondly,get from high_event_handler_map, if not match, eliminate last "/xxx" from visit path
+ * 								then get from high_event_handler_map, if matches return the event handler else eliminate last "/xxx" 
+ * 								from visit path and search again until find proper event handler or visit path is null.
+ * 
+ * 
+ * @caution1 Event's priority field is set to promote retrieve efficiency.
+ * 
+ * @caution2 If "/xxx" and "/xxx/*" both are events' handle path, "/xxx"'s priority is higher.
+ * 			 if "/xxx/*" and "/xxx/user/*" both are events' handle path, "/xxx/user/*"'s priority is higher.
+ * 
+ * @caution3 If an event handler is configured as default event handler, its handle path doesn't work 
+ * 				and t is not the top event handler any more now, if it was.
+ * 
+ * @caution4 "/*" can intercept all request but its priority is the lowest in system.
+ * 
  * </p>
  */
 public class Controller{
 	private Log log=Logger.newInstance(this.getClass());
 	public static TemplateSupport template;
 	
-	private  Event top;
 	
-	public static Map<String,Event> level_one_map;
+	/**
+	 * 
+	 * store event handler with high priority
+	 * 
+	 * <path,event>
+	 * 
+	 * Path is used to seek event handler an it is event's handle path without "/*" as end.
+	 * If you want to intercept all request put <"/",event>
+	 * 
+	 */
+	public static Map<String,Event> high_event_handler_map;
 	
-	public static Map<String,Event> simple_event_map;
+	/**
+	 * 
+	 * store event handler with minor priority
+	 * 
+	 * <path,event>
+	 * 
+	 * Path is used to seek event handler an it is event's handle path without "/" as end.
+	 * If handle path is "/" put <"/",event>
+	 * 
+	 */
+	public static Map<String,Event> minor_event_handler_map;
 
 	/**
-	 * <event_name,event>
+	 * <event_full_class_name,event>
+	 * 
+	 * all event handlers go here.
 	 */
 	public static Map<String,Event> event_map;
 	
-	public static Map<String,Object> global_vars;	
+	/**
+	 * configured in lizar.json which is set to response.
+	 */
+	public static Map<String,Object> global_vars;
 	
 	private static EventInterceptor int_cpt;
 	
@@ -62,8 +115,6 @@ public class Controller{
 	
 	public static final String EVENT_DISABLE_FILE="/WEB-INF/lizar/disable_event.json";
 
-    private static Event default_handler;
-    
     public static String encode_type;
     
     public static JList disable_list;
@@ -72,12 +123,6 @@ public class Controller{
     
     public static StaticResource static_src;
     
-    /**
-	 * 
-	 * URL *
-	 * 
-	 * */
-	public static final int SEARCH_PRIORITY_TOP=10;
 	
 	/**
 	 * 
@@ -101,16 +146,14 @@ public class Controller{
 	
 	private Controller(){
 		if(event_map==null)event_map=Web.events;
-		level_one_map=new HashMap<String,Event>();
-		simple_event_map=new HashMap<String,Event>();
+		high_event_handler_map=new HashMap<String,Event>();
+		minor_event_handler_map=new HashMap<String,Event>();
 		disable_list=new JList();
 		Map<String,Event> start_map=check_events();
 		log.info("..............................................................................");
 		log.info("\t\t\tTotally "+start_map.size()+" Event is going to load.");
 		log.info("..............................................................................");
-		_reload_encode_type(Config.xpath_str("server_info.encode_type"));
 		pre_handle(start_map);
-		_init_default_event(start_map);
 		_init_tpl_vars();
 		_init_int_cpt();
 		_load_template_support(Config.xpath_str("template.class"),Config.xpath_list("template.listen"),Config.xpath_entity("template.params"));
@@ -173,6 +216,10 @@ public class Controller{
 		reload_disable_map();
 	}
 	
+	public static void _init_encode_type(String encode_type){
+		Controller.encode_type=encode_type;
+		Event.encode_type=encode_type;
+	}
 	
 	public void _reload_encode_type(String encode_type){
 		Controller.encode_type=Config.xpath_str("server_info.encode_type","utf-8");
@@ -202,21 +249,6 @@ public class Controller{
 		}
 	}
 	
-	public void _check_default_event(String default_event){
-
-		if(default_handler==null){
-			if(StringHelper.isNotNull(default_event))_init_default_event(event_map);
-			return;
-		}
-		if(StringHelper.isNull(default_event)){
-			default_handler=null;
-			return;
-		}
-		if(!default_handler.getClass().getName().equals(default_event)){
-			_init_default_event(event_map);
-		}
-	}
-	
 	public void _check_vars(JSON vars){
     	if(vars!=null){
     		global_vars.clear();
@@ -226,7 +258,12 @@ public class Controller{
     	} 
 	}
 	
-
+	/**
+	 * Applying template config from config file lizar.json and 
+	 * 
+	 * this allow system apply and config template dynamically.
+	 * 
+	 */
 	public void _check_template_setting(){
 		String template_class=Config.xpath_str("template.class");
 		if(StringHelper.isNull(template_class)){
@@ -265,7 +302,7 @@ public class Controller{
 		try{
 			Class t=Class.forName(template_class);
 			try{
-			t.asSubclass(TemplateSupport.class);
+				t.asSubclass(TemplateSupport.class);
 			}catch(Exception e){
 				log.debug("Template Support Class "+template_class+" must extends com.lizar.web.controller.TemplateSupport", e);
 				return;
@@ -314,38 +351,7 @@ public class Controller{
 			log.info("..............................................................................");
 			log.info("\t\t\tUse Event Listener "+interceptor+" to handle before and after event ");
 			log.info("..............................................................................");
-			if(obj!=null)this.int_cpt=(EventInterceptor)obj;
-		}
-	}
-	
-	
-	
-	private void _init_default_event(Map<String,Event> start_map) {
-		String event=Config.xpath("event.default_event","");
-		if(StringHelper.isNotNull(event)){
-			if(event.indexOf(".")!=-1){
-				for(Event e:start_map.values()){
-					if(e.getClass().getName().equals(event)){
-						default_handler=e;
-						log.info("..............................................................................");
-						log.info("\t\t\tdefault event use "+event+" as default event");
-						log.info("..............................................................................");
-						break;
-					}
-				}
-				if(default_handler==null){
-					log.info("..............................................................................");
-					log.info("\t\t\tDefault Event :"+event+" can not found in event map pls check.");
-					log.info("..............................................................................");
-				}
-			}else{
-				default_handler=start_map.get(event);
-				if(default_handler==null){
-					log.info("..............................................................................");
-					log.info("\t\t\tDefault Event :"+event+" can not found in event map pls check.");
-					log.info("..............................................................................");
-				}
-			}
+			if(obj!=null) int_cpt=(EventInterceptor)obj;
 		}
 	}
 	
@@ -393,14 +399,19 @@ public class Controller{
 		return path.substring(0,i);
 	}
 
-	
+	/**
+	 * If event's priority is high there is two cases "/*" and "/mc/user/*"
+	 * 									
+	 * If event's priority is minor there is three cases  "/", /mc" and "/mc/"					
+	 */
 	private void translate_handling_path(Event e){
 		if(e.priority()==SEARCH_PRIORITY_HIGHT){
-			if(e.handling_path().endsWith("/*"))e.handling_path(e.handling_path().substring(0,e.handling_path().length()-2));
+			if(e.handling_path().length()>2&&e.handling_path().endsWith("/*"))e.handling_path(e.handling_path().substring(0,e.handling_path().length()-2));
 			else e.handling_path(e.handling_path().substring(0,e.handling_path().length()-1));
 		}else if(e.priority()==SEARCH_PRIORITY_MINOR){
-			if(StringHelper.isNull(e.handling_path())||e.handling_path().equals("/"))e.handling_path("/");
+			if(e.handling_path().equals("/"))e.handling_path("/");
 			else if(e.handling_path().endsWith("/"))e.handling_path(e.handling_path().substring(0,e.handling_path().length()-1));
+			else e.handling_path(e.handling_path());
 		}
 	}
 	
@@ -409,55 +420,69 @@ public class Controller{
 
 
 	/**
-	 * @task1 init an event
-	 * @task2 set an event's priority
-	 * @task3 assign value to queue and maps.
+	 * @task1 set an event's priority
+	 * @task2 set and an event's priority
+	 * @task3 assign values to maps.
 	 * 
-	 * @caution  there is only one default event in system.
+	 * @caution1 if event.default_handling_path() is not supported, it will not be put into event_handler_map.
+	 * 
+	 * @param key event's full class name
+	 * 
 	 */
 	private  void _express_event_listener(String key,Event event) {
 	   event.handling_path(StringHelper.isNull(event.default_handling_path())?"":event.default_handling_path().toLowerCase().trim());
 	   event.priority(get_event_priority(event.handling_path().trim()));
 	   translate_handling_path(event);
-	   if(event.priority()==SEARCH_PRIORITY_TOP){
-		   top=event;
-		   log.warn("System detect /* path event :"+event.getClass().getName()+", the rest event can not take effect.");
-	   }else if(event.priority()==SEARCH_PRIORITY_HIGHT) {
-		   level_one_map.put(level_zero(event.handling_path()),event);
-		   log.info("Event "+event.getClass().getName()+" with key "+key+" has been loaded in complex event map with high level.");
-	   } else if(event.priority()==SEARCH_PRIORITY_MINOR){
-		   simple_event_map.put(event.handling_path(), event);
-		   log.info("Event "+event.getClass().getName()+" with key "+key+" has been loaded in simple event map.");
-		  
+	   if(event.priority()==SEARCH_PRIORITY_HIGHT) {
+		   high_event_handler_map.put(event.handling_path(), event);
+		   log.info("High level event handler "+event.getClass().getName()+" with key "+key+" has been loaded to high_event_handler_map.");
+	   }else if(event.priority()==SEARCH_PRIORITY_MINOR){
+		   minor_event_handler_map.put(event.handling_path(), event);
+		   log.info("Minor level event handler "+event.getClass().getName()+" with key "+key+" has been loaded to minor_event_handler_map.");
 	   }
 	   event.set_servlet_context(Web.context);
 	   event_map.put(key, event);
 	}
 
-	
-	public static int event_level(String visit_uri){
-		if(visit_uri.length()==1)return 0;
+	/**
+	 * @returns 0 if request top event
+	 * 
+	 * @param visit_uri such as /search/blog.json
+	 */
+	public static int visit_path_level(String visit_uri){
+		if(StringHelper.isNull(visit_uri))return 0;
 		visit_uri=visit_uri.substring(1,visit_uri.length());
 		int i=0;
 		for(String s:visit_uri.split("/")){
 			if(StringHelper.isNotNull(s))i++;
 		}
-		return i-1;
+		return i;
 	}
 	
 
 	
 	/**
-	 * Set a event's priority according its visit_uri.
-	 * @param visit_uri
-	 * @return
-	 * @throws Exception 
+	 * <p>
+	 * Get a event's priority according its handle path.
+	 * 
+	 * priority:
+	 * 			high : if visit_uri is end with "/*" 
+	 * 			minor : if visit_uri doesn't contain "*"
+	 * 
+	 * @caution visit_uri must start with "/".
+	 * </p>
+	 * 
+	 * @param visit_uri event's handle_path
+	 * 
+	 * @throws EventHandlingPathIsNotSupported if visit_uri format is not supported.
 	 */
-	public static int get_event_priority(String visit_uri)  {
-		if(StringHelper.isNull(visit_uri)||visit_uri.indexOf("*")==-1)return SEARCH_PRIORITY_MINOR;
-		if(visit_uri.equals("*")||visit_uri.equals("/*")) return SEARCH_PRIORITY_TOP;
-		if(visit_uri.endsWith("*"))return SEARCH_PRIORITY_HIGHT;
-		throw new EventHandlingPathIsNotSupported(visit_uri+" is currently not support in chard controller uri interceptor pattern");
+	public static int get_event_priority(String visit_uri){
+		if(StringHelper.isNotNull(visit_uri)&&visit_uri.startsWith("/")){
+			if(visit_uri.endsWith("/*"))return SEARCH_PRIORITY_HIGHT;
+			if(visit_uri.indexOf("*")==-1)return SEARCH_PRIORITY_MINOR;
+		}
+		
+		throw new EventHandlingPathIsNotSupported(visit_uri+" is currently not supported in chard controller uri interceptor pattern");
 	}
     
 	private void _handle(Event handler,String path,EventLoader event_loader) throws ServletException, IOException{
@@ -480,7 +505,10 @@ public class Controller{
 		}else{
 			StaticResource.handle(event_loader, path, true);
 		}
-		if(int_cpt!=null)int_cpt.after(event_loader);
+		if(int_cpt!=null&&event_loader.need_after){
+			int_cpt.after(event_loader);
+			event_loader.need_after=false;
+		}
 	}
     
 	public static String postfix(String path){
@@ -498,42 +526,30 @@ public class Controller{
 	
 	public void handle_event(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException{
-		String path="/";
-		if(!StringHelper.equals(request.getContextPath()+"/", request.getRequestURI()))path=path_filter(request.getServletPath());
+		String path=StringHelper.isNull(request.getPathInfo())?"/":path_filter(request.getPathInfo());
 		pre_init(request,response);
 		String post_fix=postfix(path);
-		EventLoader event_loader = new EventLoader( path,request, response);
-		if(int_cpt!=null)int_cpt.before(event_loader);
+		boolean need_before=true;
+		EventLoader event_loader =(EventLoader)request.getAttribute("com.lizar.web.controller.eventloader");
+		if(event_loader==null){
+			event_loader=new EventLoader( path,request, response);
+			request.setAttribute("com.lizar.web.controller.eventloader", event_loader);
+		}else need_before=false;
+		if(int_cpt!=null&&need_before)int_cpt.before(event_loader);
 		event_loader.postfix(post_fix);
 		event_loader.lan=request.getLocale().getLanguage();
 		if(StringHelper.isNotNull(post_fix)&&template!=null&&template.listen().indexOf(post_fix)!=-1){
-			template.handle(event_loader);
-			if(int_cpt!=null)int_cpt.after(event_loader);
-			return;
-		}
-		if(top!=null&&top.enable){
-			try{
-				_handle(top,path,event_loader);
-			}catch(Exception e){
-				log.error("request:"+path+" throw a exception in "+top.getClass().getName(),e);
-				handle_500(event_loader);
+			template.handle(path,event_loader);
+			if(int_cpt!=null&&event_loader.need_after){
+				int_cpt.after(event_loader);
+				event_loader.need_after=false;
 			}
 			return;
 		}
 		Event event=seek_event_handler(path.toLowerCase());
 		if(event==null||!event.enable){
-			if(default_handler==null){
-				handle_404(event_loader);
-				return;
-			}else{
-				try{
-					_handle(default_handler,path,event_loader);
-				}catch(Exception e){
-					log.error("request:"+path+" throw a exception in "+event.getClass().getName(),e);
-					handle_500(event_loader);
-				}
-			}
-		}else{
+			handle_404(event_loader);
+		} else{
 			try{
 				_handle(event,path,event_loader);
 			}catch(Exception e){
@@ -544,8 +560,7 @@ public class Controller{
 	}
 	
 	private void handle_404(EventLoader event_loader) throws IOException, ServletException{
-		HttpServletRequest request=event_loader.request();
-		String path=path_filter(request.getServletPath());
+		String path=event_loader.request_path();
 		String post_fix=postfix(path);
 		String full_path=Config.path_filter("/WEB-INF/lizar/404."+post_fix, "");
 		File _404=new File(full_path);
@@ -569,8 +584,7 @@ public class Controller{
 	}
 
 	private void handle_500(EventLoader event_loader) throws IOException, ServletException{
-		HttpServletRequest request=event_loader.request();
-		String path=path_filter(request.getServletPath());
+		String path=event_loader.request_path();
 		String post_fix=postfix(path);
 		String full_path=Config.path_filter("/WEB-INF/lizar/500."+post_fix, "");
 		File _500=new File(full_path);
@@ -598,18 +612,19 @@ public class Controller{
 	 * @param path such as /search /search.json /search/blog.json
 	 */
 	private Event seek_event_handler(String path){
-		int second=path.indexOf("/", 1);
-		if(second!=-1)path=path.substring(0, second);
-		else if(path.contains("."))path=path.substring(0, path.indexOf("."));
-		Event e=simple_event_map.get(path);
+		if(path.contains("."))path=path.substring(0, path.indexOf("."));
+		if(!StringHelper.equals(path, "/")&&path.endsWith("/"))path=path.substring(0, path.length()-1);
+		Event e=null;
+		e=minor_event_handler_map.get(path);
 		if(e!=null)return e;
-		String l_0=level_zero(path);
-		e=level_one_map.get(l_0);
-		if(e!=null){
-			if(e.priority()==SEARCH_PRIORITY_HIGHT)return e;
-			if(e.handling_path().equals(path))return e;
+		int level = visit_path_level(path);
+		for(int l=0;l<level;l++){
+			e=high_event_handler_map.get(path);
+			if(e!=null)return e;
+			path=path.substring(0, path.lastIndexOf("/"));
 		}
-		return null;
+		e=high_event_handler_map.get("/");
+		return e;
 	}
 
 	
@@ -618,7 +633,9 @@ public class Controller{
 		static_src.destroy();
 	}
 
-
+	public static void main(String[] args){
+		System.out.println(visit_path_level("//"));
+	}
 
 
 }

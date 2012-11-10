@@ -67,6 +67,7 @@ public class FreemarkerSupport extends TemplateSupport {
             response.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
+//        System.out.println(template.toString());
         Object attrContentType = template.getCustomAttribute("content_type");
         if(attrContentType != null) {
             response.setContentType(attrContentType.toString());
@@ -128,7 +129,7 @@ public class FreemarkerSupport extends TemplateSupport {
 	
 	 public static final long serialVersionUID = -2440216393145762479L;
 
-	    private static final String INITPARAM_TEMPLATE_PATH = "root";
+	    private static final String INITPARAM_TEMPLATE_PATH = "template_path";
 	    private static final String INITPARAM_NOCACHE = "no_cache";
 	    private static final String INITPARAM_CONTENT_TYPE = "ContentType";
 	    private static final String DEFAULT_CONTENT_TYPE = "text/html";
@@ -552,7 +553,7 @@ public class FreemarkerSupport extends TemplateSupport {
 			this.context=context;
 			params.put("template_path",params._string("template_path","/"));
 			params.put("no_cache", params._bool("no_cache",true));
-			params.put("debug", params._bool("debug",false));
+			params.put("debug", params._bool("debug",true));
 			params.put("template_delay", params._int("template_delay",0));
 			params.put("number_format",params._string("number_format", "0.##########"));
 			

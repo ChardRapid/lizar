@@ -104,6 +104,7 @@ public class PluginManager  extends Timer {
 			try {
 				plugin=plugin.getClass().newInstance();
 				String key=plugin.getClass().getName();
+				plugin.init_property();
 				plugin.pre_run();
 				plugin.interval_time=interval_time;
 				plugin.delay_time=delay_time;
@@ -179,6 +180,7 @@ public class PluginManager  extends Timer {
 		}
 		Web.plugins=container;
 		run(start_queue);
+		clean_plugin_folder();
 	}
 	
 	private static <T> List<T> set_to_list(Set<T> set){
@@ -190,6 +192,17 @@ public class PluginManager  extends Timer {
 		return list;
 	}
 
+	private void clean_plugin_folder(){
+		File dir=new File(plugin_folder.getPath()+"/");
+		if(container!=null){
+			File[] files=dir.listFiles();
+			if(files!=null){
+				for(File f:files){
+					if(!f.getName().toLowerCase().endsWith(".property")||f.isDirectory()||container.get(f.getName().substring(0, f.getName().length()-".property".length()))==null)f.delete();
+				}
+			}
+		}
+	}
 
 
 	private void load_plugin_file(String cell_name,Plugin plugin) throws IOException, ParseException{
@@ -205,6 +218,7 @@ public class PluginManager  extends Timer {
 		Properties property=null;
 		property=PropertyHandler.readProperties(plugin.file);
 		if(property!=null){
+			System.out.println("plugin:"+plugin.getClass().getSimpleName()+"="+property);
 			plugin.interval_time=property.getProperty("interval_time");
 			plugin.delay_time=property.getProperty("delay_time");
 			try {

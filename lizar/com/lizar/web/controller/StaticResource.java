@@ -21,6 +21,7 @@ import com.lizar.util.FileTool;
 import com.lizar.util.MyMath;
 import com.lizar.util.Pair;
 import com.lizar.util.StringHelper;
+import com.lizar.web.Controller;
 
 public class StaticResource {
 	private static Log log=Logger.newInstance(StaticResource.class);
@@ -108,6 +109,7 @@ public class StaticResource {
 	public static void handle_abs_file(EventLoader event_loader,String path,boolean need_cache) {
 		HttpServletResponse response=event_loader.response();
 		response.setContentType(ContentType.is(event_loader.postfix()));
+		response.setCharacterEncoding(Controller.encode_type);
 		if(need_cache){
 			Resource file=file_map.get(MyMath.encryptionWithMD5(path));
 			if(file!=null){

@@ -32,7 +32,11 @@ public class Keys {
 	private Log log=Logger.newInstance(this.getClass());
 	private static Keys keys;
 	public static final String FILE_PATH="/WEB-INF/lizar/keys.json";
+	
 	private Map<String,Key> map;
+	/**
+	 * key config which may contain EL expression
+	 */
 	private Map<String,Key> store_map;
 	private int size=0;
 	public ConfigFile cnf;
@@ -88,6 +92,11 @@ public class Keys {
 		return k._double();
 	}
 	
+	public static boolean _bool(String key){
+		Key k=keys.map.get(key);
+		if(k==null)throw new KeyIsNotExists(key);
+		return k._bool();
+	}
 	
 	/**
 	 * 

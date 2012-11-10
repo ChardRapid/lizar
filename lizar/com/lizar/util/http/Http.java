@@ -297,18 +297,17 @@ public class Http {
 	
 
 	public static String get(String url) throws IOException{
+		StringBuilder content=new StringBuilder();
 		URL netUrl=new URL(url);
 		HttpURLConnection httpConn= (HttpURLConnection) netUrl.openConnection();
-		StringBuilder content=new StringBuilder();
 		httpConn.connect();
-		BufferedReader in = new BufferedReader(
-                new InputStreamReader(
-                		httpConn.getInputStream()));
-		String inputLine;
-		while((inputLine = in.readLine()) != null){
-			content.append(inputLine);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(httpConn.getInputStream())); 
+		String temp;
+		while((temp=reader.readLine())!=null){
+			content.append(temp);
 		}
-		in.close();
+		reader.close();
+		httpConn.disconnect();
 		return content.toString();
 	}
 	
@@ -325,13 +324,22 @@ public class Http {
 		HttpURLConnection httpConn= (HttpURLConnection) netUrl.openConnection();
 		httpConn.setReadTimeout(timeout);
 		httpConn.setConnectTimeout(timeout);
+		System.setProperty("sun.net.client.defaultConnectTimeout",timeout+"");
+		System.setProperty("sun.net.client.defaultReadTimeout",timeout+"");
 		httpConn.connect();
-		InputStream in = httpConn.getInputStream();
-		byte[] b=new byte[1024];
-		while(in.read(b)>=0){
-			content.append(new String(b,"UTF-8").trim());
+		BufferedReader reader =null;
+		try{
+			InputStreamReader inputs=new InputStreamReader(httpConn.getInputStream(),get_encode_type(httpConn.getHeaderField("content-type"), "utf-8"));
+			 reader = new BufferedReader(inputs); 
+		}catch(Exception e){
+			 reader = new BufferedReader(new InputStreamReader(httpConn.getInputStream())); 
 		}
-		in.close();
+		String temp;
+		while((temp=reader.readLine())!=null){
+			content.append(temp);
+		}
+		reader.close();
+		httpConn.disconnect();
 		return content.toString();
 	}
 	

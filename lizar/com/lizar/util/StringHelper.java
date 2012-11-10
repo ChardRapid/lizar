@@ -1,5 +1,6 @@
 package com.lizar.util;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Scanner;
@@ -188,7 +189,23 @@ public class StringHelper {
 		 }
 		 
 	 }
-	 
+	 public static long wp_strlen(String content) {
+			double result=0;
+			int temp=0;
+			for(int i=0;i<content.length();i++){
+				try {
+					temp=content.substring(i,i+1).getBytes("UTF-8").length;
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
+				if(temp==1){
+					result=result+0.5f;
+				}else{
+					result=result+temp/3.0;
+				}
+			}
+			return Math.round(Math.ceil(result));
+		}
 
 		
 	

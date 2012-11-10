@@ -21,15 +21,26 @@ import com.lizar.log.Logger;
 import com.lizar.util.FileTool;
 import com.lizar.util.StringHelper;
 import com.lizar.util.Time;
+import com.lizar.web.Controller;
 import com.lizar.web.PluginManager;
 import com.lizar.web.Web;
 import com.lizar.web.controller.ConfigManager;
 
 /**
+ * @task1 Initialize system global config 
+ * @task2 Update whole config architecture while config cell changes.
  * 
- * only the ${} is supported, refer it's inner value.
  * 
- * and config cannot use${key:xxx} or ${i18:xxx} to config for the file.
+ * All config goes "/WEB-INF/lizar.json".
+ * 
+ * Config cells contains Config, Group, Keys and I18Msg.
+ * 
+ * Config architecture consists of all config cells.
+ * And Config is the top which can't invoke config from I18Msg, Group and Keys
+ * but on the contrary the rest can invoke Config by ${cfg:xxx} such as ${cfg:server_info.root}.
+ * Another rule of Config architecture is that every config cell can invoke self's config by ${}. 
+ * 
+ * Config architecture make system hot configurable which provides great convenience for administrator to maintain system.
  * 
  * */
 public class Config {
@@ -38,16 +49,33 @@ public class Config {
 	
 	private static Config cfg;
 	
+	/**
+	 * config contains EL expression.
+	 */
 	private JSON org_config;
 	
+	/**
+	 * config with EL expression translated
+	 */
 	private JSON run_time_config;
 	
 	private boolean ready=false;
 	
+	/**
+	 * All config goes "/WEB-INF/lizar.json".
+	 */
 	public static final String FILE_PATH="/WEB-INF/lizar.json";
 	
+	/**
+	 * config file
+	 */
 	private File file;
 	
+	/**
+	 * config file's last modify time 
+	 * 
+	 * use to check whether config file has changed.
+	 */
 	private long last_modify_time;
 	
 	private static ServletContext context;
@@ -76,12 +104,17 @@ public class Config {
 		return cfg;
 	}
 	
+	/**
+	 * Invoked when system closes.
+	 */
 	public void destroy(){
 		end=true;
 		checker.interrupt();
 	}
 	
-	
+	/**
+	 * Check and update all config(Config,Keys,Group and I18Msg) which will work immediately.
+	 */
 	private void check(){
 		checker=new Thread(){
 			public void run() {
@@ -119,6 +152,7 @@ public class Config {
 								}
 							}
 						}
+						//check and update other config cell
 						try {
 							Web.keys.check();
 						} catch (IOException e) {
@@ -261,7 +295,7 @@ public class Config {
 	
 	private void apply_event_changes(){
 		Web.controller._check_interceptor(xpath_str("event.interceptor", ""));
-		Web.controller._check_default_event(xpath_str("event.default_event",""));
+//		Web.controller._check_default_event(xpath_str("event.default_event",""));
 		Web.controller._check_vars(xpath_entity("event.global_var"));
 	}
 	
@@ -272,7 +306,6 @@ public class Config {
 			return;
 		}
 		event.put("interceptor",event._string("interceptor",""));
-		event.put("default_event",event._string("default_event",""));
 		if(event.get("global_var")==null)event.put("global_var", new JObject());
 		entity.put("event", event);
 	}
@@ -395,8 +428,6 @@ public class Config {
 	 */
 	private static Object explain(String e){
 		String[] params=e.split("\\.");
-		System.out.println(e);
-		System.out.println(params.length);
 		JSON cf=cfg.run_time_config;
 		if(params.length==1)return cf.get(params[0]);
 		for(int i=0;i<params.length;i++){
@@ -496,13 +527,11 @@ public class Config {
 	 * Create file used to store cell configurations mainly plugin configurations.
 	 */
 	private void _init_keys_config() throws IOException{
-		File f=new File(path_filter(Keys.FILE_PATH));
-		FileTool.write_to_file("",f);
+		
 	}
 	
 	private void _init_group_config() throws IOException{
-		File f=new File(path_filter(Group.FILE_PATH));
-		FileTool.write_to_file("",f);
+		
 	}
 	
 	private void _init_server_info_config(){
@@ -517,6 +546,7 @@ public class Config {
 		server_info.put("config_check_inverval", server_info._string("config_check_inverval", "3s"));
 		server_info.put("enable_config_manager", server_info._bool("enable_config_manager", true));
 		_init_config_manager();
+		Controller._init_encode_type(server_info._string("encode_type", "utf-8"));
 		org_config.put("server_info", server_info);
 	}
 	
@@ -757,7 +787,6 @@ public class Config {
 			event=new JObject();
 		}
 		event.put("interceptor",event._string("interceptor",""));
-		event.put("default_event",event._string("default_event",""));
 		if(event.get("global_var")==null)event.put("global_var", new JObject());
 		org_config.put("event", event);
 	}

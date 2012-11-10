@@ -5,15 +5,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.jsp.JspWriter;
 
 import com.lizar.log.Log;
 import com.lizar.log.Logger;
@@ -40,7 +37,7 @@ import com.lizar.web.loader.Plugin;
  *  	  and then event <strong>handles</strong> the request.
  * 
  * */
-public class Web implements Filter{
+public class Web extends HttpServlet{
     
 	private Log log=Logger.newInstance(this.getClass());
 	
@@ -74,27 +71,27 @@ public class Web implements Filter{
     	return container.get( t);
     }
     
-	@Override
-	public void doFilter(ServletRequest arg0, ServletResponse arg1,
-			FilterChain chain) throws IOException, ServletException {
-		// TODO Auto-generated method stub
-		HttpServletRequest request=(HttpServletRequest)arg0;
-		HttpServletResponse response=(HttpServletResponse)arg1;
-		String path=request.getRequestURI();
-		if(path.endsWith(".jsp")){
-			request.getRequestDispatcher(path.substring(request.getContextPath().length()+1,path.length())).forward(request, response);
-		}else controller.handle_event(request, response);
+	
+	protected void doGet(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		doPost(request, response);
 	}
-
+	
+	
+	protected void doPost(HttpServletRequest request, HttpServletResponse response)
+			throws ServletException, IOException {
+		controller.handle_event(request, response);
+	}
 	
     
     @Override
-	public void init(FilterConfig filterConfig) throws ServletException {
+	public void init() throws ServletException {
 		// TODO Auto-generated method stub
-		context=filterConfig.getServletContext();
-		String debug_mode=filterConfig.getInitParameter("debug");
+		context=this.getServletContext();
+		String debug_mode=this.getInitParameter("debug");
 		if(debug_mode!=null&&debug_mode.trim().toLowerCase().equals("true"))debug=true;
 		log.info("Start to Run...");
+		log.info("Base Dir:"+this.getServletContext().getRealPath("/"));
 		try {
 			_init_property();
 		} catch (Exception e) {
@@ -114,9 +111,9 @@ public class Web implements Filter{
 		log.info("Init Property.......");
 		plugins=new HashMap<String,Plugin>();
 		events=new HashMap<String,Event>();
-		cfg=Config.instance();						//load system configuration
-		keys=Keys.instance();
-		group=Group.instance();	
+		cfg=Config.instance();						//load global system configuration
+		keys=Keys.instance();						//load cell configuration
+		group=Group.instance();						//load cell configuration
 		i18=I18Msg.instance();
 		
 		

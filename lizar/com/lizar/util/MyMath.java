@@ -7,20 +7,18 @@ import java.util.Stack;
 
 public class MyMath {
 	public static void main(String[] args) {
-		System.out.println("*.ftl:*.htm".split(":")[0]);
-		System.out.println(_10_to_62(10296));
-		System.out.println(_62_to_10("eYl"));
+		
 	}
 	
-	public static final char[] _62_array={'q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m','0','1','2','3','4','5','6','7','8','9','Q','W','E','R','T','Y','U','I','O','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M'};
+	public static final char[] _60_array={'q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m','1','2','3','4','5','6','7','8','9','Q','W','E','R','T','Y','U','I','P','A','S','D','F','G','H','J','K','L','Z','X','C','V','B','N','M'};
 	
 	
-	public static String _10_to_62(long number){
+	public static String _10_to_60(long number){
 			Long rest=number;
 			Stack<Character> stack=new Stack<Character>();
 			StringBuilder result=new StringBuilder(0);
 			while(rest!=0){
-				stack.add(_62_array[new Long((rest-(rest/62)*62)).intValue()]);
+				stack.add(_60_array[new Long((rest-(rest/60)*60)).intValue()]);
 				rest=rest/62;
 			}
 			for(;!stack.isEmpty();){
@@ -30,21 +28,21 @@ public class MyMath {
 			
 	}
 	
-	public static long _62_to_10(String sixty_str){
+	public static long _60_to_10(String sixty_str){
 		int multiple=1;
 		long result=0;
 		Character c;
 		for(int i=0;i<sixty_str.length();i++){
 			c=sixty_str.charAt(sixty_str.length()-i-1);
-			result+=_62_value(c)*multiple;
+			result+=_60_value(c)*multiple;
 			multiple=multiple*62;
 		}
 		return result;
 	}
 	
-	private static int _62_value(Character c){
-		for(int i=0;i<_62_array.length;i++){
-			if(c==_62_array[i]){
+	private static int _60_value(Character c){
+		for(int i=0;i<_60_array.length;i++){
+			if(c==_60_array[i]){
 				return i;
 			}
 		}
