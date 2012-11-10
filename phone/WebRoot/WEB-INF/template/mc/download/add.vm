@@ -1,0 +1,70 @@
+<html>
+<head>
+<title>后端管理中心</title>
+</head>
+
+<body>
+#if(${msg})
+$!msg <br/> <hr/>
+#end
+后端管理中心-download/add  | <a href='$root/mc/download'>下载资源管理</a> | <a href='$root/mc/download/recent'>最近下载资源</a> | <a href='$root/mc/download'>下载管理</a> | <a href='$root/mc'>管理中心</a> | <a href='$root/mc/movie'>电影管理</a> | &nbsp; &nbsp;${user.user_detail.name} &nbsp; <a href='${root}/logout'>退出登录</a><br/><br/>
+<a href='$root/mc/download/add'>刷新</a><br/><br/><hr/>
+<br/><br/>
+
+<form method="post" action="${root}/mc/download/add">
+<table>
+<tr>
+<td>电影 ID</td><td><input name="movie_id"></td>
+</tr>
+<tr>
+<td>资源描述</td><td><input name="title"></td>
+</tr>
+<tr>
+<td>品质</td><td><select name="quality">
+	<option value="1">枪版</option>
+	<option value="2">DVD版</option>
+	<option value="3">高清</option>
+	<option value="4">超清</option>
+	<option value="0">未知</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td>下载链接</td><td><input name="links">
+</td>
+</tr>
+<tr>
+<td>资源大小</td><td><input name="size"><select name="size_type">
+	<option value="2">MB</option>
+	<option value="3">GB</option>
+	<option value="1">KB</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td>字幕语言</td><td><select name="subtitle">
+	<option value="1">中文</option>
+	<option value="2">英语</option>
+	<option value="0">无</option>
+	</select>
+</td>
+</tr>
+<tr>
+<td>视频截图：</td><td><textarea cols="60" rows="20" name="screenshot"></textarea>多张截图图片链接以分号隔开
+</td>
+</tr>
+
+<tr>
+<td>评论</td><td><textarea cols="60" rows="20" name="comments"></textarea>多条评论以分号隔开
+</td>
+</tr>
+<tr>
+<td><input type="submit" value="确认添加"/>
+</td>
+</tr>
+</form>
+
+  
+
+</body>
+</html>

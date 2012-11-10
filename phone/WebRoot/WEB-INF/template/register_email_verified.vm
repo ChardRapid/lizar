@@ -1,0 +1,9 @@
+<html>
+<head><head>
+<title></title>
+<body>
+
+<a href='${root}'>首页</a>
+email验证成功，<a href='$root'>返回首页</a>
+</body>
+</html>

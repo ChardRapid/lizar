@@ -1,0 +1,12 @@
+<html>
+<head><head>
+<title></title>
+<body>
+
+<a href='${root}'>首页</a>
+邮件已经发送到$!email 失败。<br/>
+检查一下上面Email地址是否正确，错了就重新注册一次吧:)<br/>
+
+如果确认Email输入正确，请检查您的邮箱STMP服务是否开启，稍等几分钟，让36tw重发一封
+</body>
+</html>

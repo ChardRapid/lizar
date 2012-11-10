@@ -1,0 +1,13 @@
+<html>
+<head>
+<title>后端管理中心</title>
+</head>
+
+<body>
+后端管理中心-works->add<br/>
+<a href='$root/mc'>管理中心</a><br/>
+<a href='$root/mc/works'>作品管理</a><br/>
+
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+<html>
+<head>
+<title>后端管理中心</title>
+</head>
+
+<body>
+后端管理中心-user<br/>
+<a href='$root/mc'>管理中心</a><br/>
+<a href='$root/mc/user/disable'>禁用列表</a><br/>
+
+</body>
+</html>

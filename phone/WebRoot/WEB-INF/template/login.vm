@@ -1,0 +1,19 @@
+<html>
+<head><head>
+<title></title>
+<body>
+<a href='${root}'>首页</a>
+<h3>36tw登录</h3><br/><br/><br/>
+<br/>
+	$!msg
+<br/>
+<form method="post" action="$!root/login">
+Email:<input type="text" value="$!email" name="email"><br/>
+密码:&nbsp;<input type="password" value="" name="password"><br/>
+
+<input type="checkbox" value="31536000" name="timeout">下次自动登录
+
+<input type="submit" value="提交">
+
+</body>
+</html>

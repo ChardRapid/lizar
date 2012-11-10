@@ -1,0 +1,37 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title></title>
+<head>
+<body>
+#if($user)
+$user.user_detail.name &nbsp; <a href='${root}/logout'>退出登录</a>
+#else
+<a href='${root}/login'>登录</a>|<a href='${root}/register'>注册</a>
+#end
+<h3>36tw</h3><br/><br/><br/>
+<h4>电影</h4><br/>
+最新电影更新：<br/><br/>
+<table>
+ <tr>
+    <td>资源名称</td>
+    <td>大小</a></td>
+    <td>下载次数</td>
+    <td>发布时间</td>
+    </tr>
+#foreach( $download in $links )
+    <tr>
+    <td><a href="${root}/download/${download.get("_id")}"> $!download.title </a> 
+    &nbsp;&nbsp;#if($download.comments) $download.comments.size() #else 0 #end
+    &nbsp;&nbsp;<a href="$download.links">下载</a></td>
+    <td>大小$download.size${download.size_type}</a></td>
+    <td>$download.num</td>
+    <td>$download.rest_time</td>
+    </tr>
+#end
+
+
+</table>
+
+</body>
+</html>

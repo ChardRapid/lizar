@@ -1,0 +1,26 @@
+<html>
+<head><head>
+<title></title>
+<body>
+
+<a href='${root}'>首页</a>
+<h3>36tw注册</h3><br/><br/><br/>
+<br/>
+	$!msg
+<br/>
+<form method="post" name="register" action="${root}/register">
+Email:<input type="text" value="$!email" name="email"><br/>
+密码:&nbsp;<input type="password" value="" name="password"><br/>
+昵称:&nbsp;<input type="text" value="$!name" name="name"><br/>
+验证码:&nbsp;<input type="text" value="" name="vcode"><img src="${root}/vcode"/><br/>
+<input type="checkbox" value="true" name="agree">我已经认真阅读并同意36tw的《<a target="_blank" href="${root}/about/agreement">使用协议</a>》<br>
+<input type="submit" value="提交">
+</form>
+<script>
+	function commit(){
+		document.register.submit();
+	
+	}
+</script>
+</body>
+</html>

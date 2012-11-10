@@ -1,0 +1,52 @@
+<html>
+<head>
+<title>后端管理中心</title>
+</head>
+<body>
+#if(${msg})
+$!msg <br/><hr/>
+#end
+后端管理中心-crawl | <a href='$root/mc'>管理中心</a> | <a href='$root/mc_movie_fetch'>电影更新</a> | &nbsp; &nbsp;${user.user_detail.name} &nbsp; <a href='${root}/logout'>退出登录</a><br/><br/>
+<a href='$root/mc_page_crawl'>刷新</a><br/><br/>
+<hr/>
+
+<br/>
+当前系统数据汇总：<br/><br/>
+电影数量：${movie_num} | 电影明星数量：${celebrity_num}<br/><br/>
+捕获页面数量：${page_num} | 失败页面数量：${failed_page_num}<br/><br/>
+剩余未捕获页面数量：${new_page_num}<br/>
+
+<br/>
+
+<br/>
+上次捕获数据汇总：
+<hr/>
+
+#if($crawl_started)
+系统正在抓取网页，开始时间:$last_crawl.start_time &nbsp;&nbsp;启动线程数量：$last_crawl.max_threads<br/><br/>
+<a href="${root}/mc_page_crawl/stop">立刻停止</a>
+
+
+
+#elseif($last_crawl)
+上次开始时间：$last_crawl.start_time &nbsp;&nbsp;启用线程：$last_crawl.max_threads<br/>
+#if($last_crawl.end_time)结束时间：   &nbsp;&nbsp;
+开始时 new_page剩余数量：#if($last_crawl.start_new_page_num) $last_crawl.start_new_page_num #else 0 #end &nbsp;&nbsp;结束时 new_page剩余数量：#if($last_crawl.end_new_page_num) $last_crawl.end_new_page_num #else 0 #end<br/>
+总共捕获：#if($last_crawl.page_num) $last_crawl.page_num #else 0 #end 个页面<br/>
+总共有:#if($last_crawl.failed_num) $last_crawl.failed_num #else 0 #end 个失败页面<br/>
+#else
+上次任务异常结束
+#end
+
+<form method="post" action="${root}/mc_page_crawl/start">
+<input type="submit" value="开始">
+</form>
+#else
+系统尚未开始抓取<br/>
+<form method="post" action="${root}/mc_page_crawl/start">
+<input type="submit" value="开始">
+</form>
+#end
+
+</body>
+</html>

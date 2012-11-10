@@ -1,0 +1,133 @@
+{ 
+	"mc" : 
+	[
+		{ 
+			"code" : "email",
+			"value" : "admin@tw.com"
+			
+		},
+		{ 
+			"code" : "password",
+			"value" : "admin@tw.com"
+			
+		},
+		{ 
+			"code" : "name",
+			"value" : "UseAdmin@*()"
+			
+		}
+	],
+	"crawl_disallow_map" : 
+	[
+		{ 
+			"code" : "/ticket",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/subject_search",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/amazon_search",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/forum",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/new_subject",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/service/iframe",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/j",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/link2",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/recommend",
+			"value" : true
+			
+		},
+		{ 
+			"code" : "/mupload",
+			"value" : true
+			
+		}
+	],
+	"session_dao" : 
+	[
+		{ 
+			"code" : "timeout",
+			"value" : ""
+			
+		},
+		{ 
+			"code" : "next",
+			"value" : "pp"
+			
+		}
+	],
+	"config" : 
+	[
+		{ 
+			"code" : "text",
+			"value" : 1
+			
+		},
+		{ 
+			"code" : "vv",
+			"value" : 1
+			
+		}
+	],
+	"crawl" : 
+	[
+		{ 
+			"code" : "thread_sleep_interval",
+			"value" : 5000
+			
+		}
+	],
+	"movie_fetch" : 
+	[
+		{ 
+			"code" : "api_interval",
+			"value" : 1500
+			
+		},
+		{ 
+			"code" : "apikey",
+			"value" : "0c3246ce56721e1b2496d46b03565a51"
+			
+		}
+	],
+	"mailbox" : 
+	[
+		{ 
+			"code" : "sender_email",
+			"value" : "594382300@qq.com"
+			
+		},
+		{ 
+			"code" : "sender_password",
+			"value" : "dwbMIANju"
+			
+		}
+	]
+	}

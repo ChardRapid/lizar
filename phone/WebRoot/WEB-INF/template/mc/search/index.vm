@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>后端管理中心</title>
+</head>
+
+<body>
+#if(${run}==false&&${msg})
+$msg <br/> <hr/>
+#end
+后端管理中心-download | <a href='$root/mc'>管理中心</a> | <a href='$root/mc/download/recent'>最近下载资源</a> | <a href='$root/mc/movie'>电影管理</a> | &nbsp; &nbsp;${user.user_detail.name} &nbsp; <a href='${root}/logout'>退出登录</a><br/><br/>
+<a href='$root/mc/download'>刷新</a><br/><br/><hr/>
+<br/><br/>
+
+<a href="${root}/mc/download/add">添加</a><br/><br/><hr/>
+
+#if(${pre}==0&&${next}==0)
+首页 &nbsp;&nbsp;上一页&nbsp;&nbsp;下一页
+#elseif(${pre}==0)
+首页 &nbsp;&nbsp;上一页&nbsp;&nbsp;<a href="${root}/mc/download/recent?timeline=${next}">下一页</a>
+#elseif(${next}==0)
+首页 &nbsp;&nbsp;<a href="${root}/mc/download/recent?timeline=${pre}">上一页</a>&nbsp;&nbsp;下一页
+#else
+首页 &nbsp;&nbsp;<a href="${root}/mc/download/recent?timeline=${pre}">上一页</a>&nbsp;&nbsp;<a href="${root}/mc/download/recent?timeline=${next}">下一页</a>
+#end
+
+
+<br/><br/><hr/>
+#foreach( $link in $list )
+
+   [<a href="${root}/mc/download/top/cancel?id=${link.get("_id")}">取消置顶</a>]|[<a href="${root}/mc/download/delete?id=${link.get("_id")}">删除</a>] <a href='${root}/download/${link.get("_id")}'>$!link.title</a> &nbsp;&nbsp;
+    #foreach( $l in $link.links )
+   	 <a href='${l}'>下载地址$velocityCount</a>
+	#end
+     <br/><br/>
+#end
+
+
+#if(${pre}==0&&${next}==0)
+首页 &nbsp;&nbsp;上一页&nbsp;&nbsp;下一页
+#elseif(${pre}==0)
+首页 &nbsp;&nbsp;上一页&nbsp;&nbsp;<a href="${root}/mc/download/recent?timeline=${next}">下一页</a>
+#elseif(${next}==0)
+首页 &nbsp;&nbsp;<a href="${root}/mc/download/recent?timeline=${pre}">上一页</a>&nbsp;&nbsp;下一页
+#else
+首页 &nbsp;&nbsp;<a href="${root}/mc/download/recent?timeline=${pre}">上一页</a>&nbsp;&nbsp;<a href="${root}/mc/download/recent?timeline=${next}">下一页</a>
+#end
+</body>
+</html>

@@ -1,0 +1,17 @@
+<html>
+<head>
+<title>后端管理中心</title>
+</head>
+
+<body>
+后端管理中心<br/>
+#if($user)
+$user.user_detail.name &nbsp; <a href='${root}/logout'>退出登录</a><br/><br/>
+#end
+<a href='$root/mc/user'>用户管理</a><br/><br/>
+<a href='$root/mc_page_crawl'>爬虫管理</a><br/><br/>
+<a href='$root/mc/movie'>电影档案管理</a><br/><br/>
+<a href='$root/mc/download'>下载资源管理</a><br/><br/>
+<a href='$root/mc/works'>演员档案</a><br/><br/>
+</body>
+</html>

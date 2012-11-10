@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+   <!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">  
+   <log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>  
+         
+       <appender name="_STDOUT" class="org.apache.log4j.ConsoleAppender">  
+           <layout class="org.apache.log4j.PatternLayout">  
+               <param name="ConversionPattern"  
+                   value="%d{yyyy/MM/dd HH:mm:ss.sss} [%-5p] %c - %m%n"/>  
+           </layout>  
+       </appender>  
+         
+       <appender name="_DEBUG" class="org.apache.log4j.RollingFileAppender">  
+          <param name="File" value="../cutool_log/debug/debug.log"/>
+           <param name="maxFileSize" value="2000KB"/>  
+           <param name="maxBackupIndex" value="10"/>  
+           <layout class="org.apache.log4j.PatternLayout">  
+               <param name="ConversionPattern"  
+                   value="%d{yyyy/MM/dd HH:mm:ss.sss} [%-5p] %c - %m%n"/>  
+           </layout>  
+           <!-- filter作用？  配置LevelMax与LevelMin限定输出到文件的日志级别 -->  
+           <filter class="org.apache.log4j.varia.LevelRangeFilter">  
+                           <param name="LevelMin" value="DEBUG" />  
+                           <param name="LevelMax" value="DEBUG" />  
+           </filter> 
+       </appender>  
+         
+       <appender name="_INFO" class="org.apache.log4j.RollingFileAppender" >  
+         <param name="File" value="../cutool_log/info/info.log"/>
+           <param name="maxFileSize" value="2000KB"/>  
+           <param name="maxBackupIndex" value="10"/>  
+           <layout class="org.apache.log4j.PatternLayout">  
+               <param name="ConversionPattern"  
+                   value="%d{yyyy/MM/dd HH:mm:ss.sss} [%-5p] %c - %m%n"/>  
+           </layout>  
+           <filter class="org.apache.log4j.varia.LevelRangeFilter">  
+                       <param name="LevelMax" value="INFO" />  
+                       <param name="LevelMin" value="INFO" />  
+               </filter>  
+       </appender>  
+         
+       <appender name="_WARN" class="org.apache.log4j.RollingFileAppender">  
+           <param name="File" value="../cutool_log/warn/warn.log"/>  
+           <param name="maxFileSize" value="2000KB"/>  
+           <param name="maxBackupIndex" value="10"/>  
+           <layout class="org.apache.log4j.PatternLayout">  
+               <param name="ConversionPattern"  
+                   value="%d{yyyy/MM/dd HH:mm:ss.sss} [%-5p] %c - %m%n"/>  
+           </layout>  
+           <filter class="org.apache.log4j.varia.LevelRangeFilter">  
+                       <param name="LevelMax" value="WARN" />  
+                       <param name="LevelMin" value="WARN" />  
+               </filter>  
+       </appender>  
+         
+       <appender name="_ERROR" class="org.apache.log4j.RollingFileAppender">  
+           <param name="File" value="../cutool_log/error/error.log"/> 
+           <param name="maxFileSize" value="2000KB"/>  
+           <param name="maxBackupIndex" value="10"/>  
+           <layout class="org.apache.log4j.PatternLayout">  
+               <param name="ConversionPattern"  
+                   value="%d{yyyy/MM/dd HH:mm:ss.sss} [%-5p] %c - %m%n"/>  
+           </layout>  
+           <filter class="org.apache.log4j.varia.LevelRangeFilter">  
+                       <param name="LevelMax" value="ERROR" />  
+                       <param name="LevelMin" value="ERROR" />  
+               </filter>  
+       </appender>  
+         
+	<root>
+		<priority value="info"/>
+		<appender-ref ref="_STDOUT"/> 
+		<appender-ref ref="_INFO"/> 
+		<appender-ref ref="_DEBUG"/>
+		<appender-ref ref="_WARN"/>
+		<appender-ref ref="_ERROR"/> 
+	</root>
+ </log4j:configuration>  

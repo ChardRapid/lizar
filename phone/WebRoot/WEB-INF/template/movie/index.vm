@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>#if(${movie.title_cn})${movie.title_cn}#else ${movie.title}#end</title>
+<meta name="keywords" content="#if(${movie.title_cn})${movie.title_cn},#end${movie.title},#if(${movie.title_cn})${movie.title_cn}#else ${movie.title}#end影评,剧情介绍,电影图片,预告片,影讯,论坛">
+<meta name="description" content="#if(${movie.title_cn})${movie.title_cn}#else ${movie.title}#end电影简介和剧情介绍、最长的拥抱影评、图片、预告片和论坛推荐">
+</head>
+<body>
+#if($user)
+$user.user_detail.name &nbsp; <a href='${root}/logout'>退出登录</a><br/>
+#else
+<a href='${root}/login'>登录</a>|<a href='${root}/register'>注册</a><br/>
+#end
+<h2>#if(${movie.title_cn})${movie.title_cn}#else ${movie.title}#end<h2>
+<br/><br/><br/>
+#if(${movie.rating})
+评分：${movie.rating.average}($movie.rating.numRaters)
+#else
+暂无评分
+#end
+<br/><br/>
+
+#if(${movie.year}>0)年代：{$movie.year}<br/><br/>#end
+
+#if(${movie.movie_duration})电影时长：${movie.movie_duration}<br/><br/> #end
+
+#if(${movie.website})电影官网：${movie.website}<br/><br/> #end
+
+#if(${movie.country})国家：${movie.country}<br/><br/> #end
+
+#if(${movie.writer})编剧：${movie.writer}<br/><br/>#end
+
+#if(${movie.director})导演：${movie.director}<br/><br/>#end
+
+#if(${movie.pubdate})上映时间：${movie.pubdate}<br/><br/>#end
+
+#if(${movie.cast})演员：${movie.cast}<br/><br/>#end
+
+#if(${movie.aka})别名：${movie.aka}<br/><br/>#end
+
+<img src='${movie.image}'/>
+
+<p>$movie.summary
+</p>
+
+</body>
+</html>

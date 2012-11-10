@@ -1,0 +1,44 @@
+[
+	{ 
+		"name" : "session_dao.timeout",
+		"value" : "sdfsd${cfg:server_info.description}xxx",
+		"desc" : ""
+		
+	},
+	{ 
+		"name" : "mongodb.name",
+		"value" : "phone",
+		"desc" : ""
+		
+	},
+	{ 
+		"name" : "pps",
+		"value" : "00000",
+		"desc" : ""
+		
+	},
+	{ 
+		"name" : "session_auto_time_out",
+		"value" : 86400,
+		"desc" : ""
+		
+	},
+	{ 
+		"name" : "session_max_auto_time_out",
+		"value" : 2592000,
+		"desc" : ""
+		
+	},
+	{ 
+		"name" : "crawl.page_crawl_detected_interval",
+		"value" : 10000,
+		"desc" : ""
+		
+	},
+	{ 
+		"name" : "traffic_open",
+		"value" : true,
+		"desc" : ""
+		
+	}
+	]

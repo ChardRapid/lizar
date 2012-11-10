@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="phone">
+        <wb-resource deploy-path="/" source-path="/WebRoot" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/lizar"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/mongo"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/lizar_email"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/tw_search"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/lizar_anlaysis"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/tw_crawl"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/tw_src"/>
+        <property name="java-output-path" value="/phone/build/classes"/>
+        <property name="context-root" value="phone"/>
+    </wb-module>
+</project-modules>

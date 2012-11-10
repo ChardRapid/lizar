@@ -1,0 +1,32 @@
+<html>
+<head>
+<title>后端管理中心</title>
+</head>
+
+<body>
+#if(${run}==false&&${msg})
+$msg <br/> <hr/>
+#end
+后端管理中心-works | <a href='$root/mc'>管理中心</a> | <a href='$root/mc/movie'>电影档案</a> | <a href='$root/mc_page_crawl'>爬虫任务</a> | &nbsp; &nbsp;${user.user_detail.name} &nbsp; <a href='${root}/logout'>退出登录</a><br/><br/>
+<a href='$root/mc_movie_fetch'>刷新</a><br/><br/><hr/>
+<br/>
+当前系统数据汇总：<br/><br/>
+当前系统电影数量：${movie_profile_num}<br/><br/>
+新发现电影数量：${douban_movie_num}<br/>
+<br/>
+
+#if(${douban_movie_num}>0)
+#if(${run}==false)
+<hr/>转移新电影：<a href="${root}/mc_movie_fetch/syn/new_detect">立刻同步</a><br/><br/>
+#end
+#else
+<hr/>更新所有电影数据：<a href="${root}/mc_movie_fetch/syn/all">立刻同步</a><br/><br/>
+#end
+
+#if(${run})
+<hr/>
+$!msg <br/><br/>
+<a href='${root}/mc_movie_fetch/cancel'>取消更新</a>
+#end
+</body>
+</html>

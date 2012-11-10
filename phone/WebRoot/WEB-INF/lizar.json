@@ -1,0 +1,66 @@
+{ 
+	"config_manager" : 
+	{ 
+		"user_name" : "lizar",
+		"password" : "password"
+		
+	},
+	"server_info" : 
+	{ 
+		"name" : "/phone",
+		"root" : "http://localhost:8080/phone",
+		"encode_type" : "utf-8",
+		"description" : "hot run app",
+		"config_check_inverval" : "3s",
+		"enable_config_manager" : true
+		
+	},
+	"container" : 
+	{ 
+		"dirs" : 
+		[
+			"C:\\Users\\Administrator\\workspace\\.metadata\\.plugins\\org.eclipse.wst.server.core\\tmp1\\wtpwebapps\\phone\\WEB-INF\\classes"
+		]
+		},
+	"plugin" : 
+	{ 
+		
+	},
+	"event" : 
+	{ 
+		"interceptor" : "com.tw.event.Interceptor",
+		"default_event" : "com.tw.event.Index",
+		"global_var" : 
+		{ 
+			"root":"${server_info.root}",
+			"static_root":"http://static.36tw.com",
+			"version":"0.0.1"
+		}
+		},
+	"template" : 
+	{ 
+		"class" : "com.lizar.web.controller.VelocitySupport",
+		"listen" : ["vm"],
+		"params" : 
+		{ 
+			
+		}
+		},
+	"static_resource" : 
+	{ 
+		"delay_load" : "3s",
+		"file_max_size" : "10MB",
+		"file_cache_min_uses" : 1
+		
+	},
+	"muti_language" : 
+	{ 
+		"var" : "m",
+		"default_locale" : ""
+		
+	},
+	"db_config" : 
+	{ 
+		
+	}
+	}

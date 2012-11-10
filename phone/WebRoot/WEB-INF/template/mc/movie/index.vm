@@ -1,0 +1,28 @@
+<html>
+<head>
+<title>后端管理中心</title>
+</head>
+
+<body>
+#if(${run}==false&&${msg})
+$msg <br/> <hr/>
+#end
+后端管理中心-works | <a href='$root/mc'>管理中心</a> | <a href='$root/mc_movie_fetch'>电影更新管理</a> | &nbsp; &nbsp;${user.user_detail.name} &nbsp; <a href='${root}/logout'>退出登录</a><br/><br/>
+<a href='$root/mc/movie'>刷新</a><br/><br/><hr/>
+<br/>
+当前系统数据汇总：<br/><br/>
+当前系统电影数量：${movie_profile_num}<br/><br/>
+新发现电影数量：${douban_movie_num}<br/>
+<br/>
+<hr/>
+
+#if(${year}) ${year}年电影 &nbsp;总共：#if($list) $list.size() #else 0 #end 部<br/><br/> #end
+<form method="get" action="${root}/mc/movie"><input name="year"/><input type="submit" value="查询"></form>
+
+#foreach( $movie in $list )
+    <a href="${root}/movie/${movie.id}">$!movie.title_cn &nbsp;&nbsp;$!movie.title </a>&nbsp;&nbsp;${movie.rating.average}($movie.rating.numRaters)<br/>
+    $!movie.summary <br/><br/>
+#end
+
+</body>
+</html>
