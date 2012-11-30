@@ -55,7 +55,7 @@ public class Keys {
 			keys.map.put(key, k);
 			keys.store_map.put(key, k.clone());
 		}else{
-			keys.log.info("Key "+key+" will not set into keys container, as there already one from file or other set");
+			keys.log.debug("Key "+key+" will not set into keys container, as there already one from file or other set");
 		}
 		
 	}
@@ -70,7 +70,7 @@ public class Keys {
 			 keys.map.put(key, k);
 			 keys.store_map.put(key, k.clone());
 		}else{
-			keys.log.info("Key "+key+" will not set into keys container, as there already one from file or other set");
+			keys.log.debug("Key "+key+" will not set into keys container, as there already one from file or other set");
 		}
 	}
 

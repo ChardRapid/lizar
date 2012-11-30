@@ -49,7 +49,11 @@ public class EventLoader {
 		String[] ps=request_path.split("/");
 		this.path=new ArrayList<String>(ps.length);
 		for(String s:ps){
-			if(StringHelper.isNotNull(s))path.add(s);
+			if(StringHelper.isNotNull(s)){
+				if(s.lastIndexOf(".")!=-1){
+					path.add(s.substring(0, s.lastIndexOf(".")));
+				}else path.add(s);
+			}
 		}
 	}
 	
@@ -331,6 +335,12 @@ public class EventLoader {
 	public <T> T get_session_attr(String key,T _default){
 		Object v=request.getSession().getAttribute(key);
 		if(v==null)return _default;
+		else return (T)v;
+	}
+	
+	public <T> T get_session_attr(String key,Class<T>  t){
+		Object v=request.getSession().getAttribute(key);
+		if(v==null)return null;
 		else return (T)v;
 	}
 	

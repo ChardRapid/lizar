@@ -218,7 +218,6 @@ public class PluginManager  extends Timer {
 		Properties property=null;
 		property=PropertyHandler.readProperties(plugin.file);
 		if(property!=null){
-			System.out.println("plugin:"+plugin.getClass().getSimpleName()+"="+property);
 			plugin.interval_time=property.getProperty("interval_time");
 			plugin.delay_time=property.getProperty("delay_time");
 			try {

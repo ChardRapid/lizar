@@ -1,6 +1,5 @@
 package com.lizar.log;
 
-import com.lizar.web.loader.Cell;
 
 public interface Log {
 	void error(String message);

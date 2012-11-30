@@ -10,7 +10,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.jsp.JspWriter;
 
 import com.lizar.log.Log;
 import com.lizar.log.Logger;
@@ -28,8 +27,8 @@ import com.lizar.web.loader.Plugin;
  * @caution2 dao,plugin,event and all kinds of modules have only one instance in system.
  * 
  * @task1 startup system components:<br/>
- * 			two level components:module, {dao,plugin,event}<br/>
- * 			dao: database access object<br/>
+ * 			two level components:module, {cell,plugin,event}<br/>
+ * 			cell: lizar object<br/>
  * 			plugin: scheduled task<br/>
  * 			event: user request task<br/>
  * 			sequence: 1 model{container,controller,pluginManager},2 {cell,plugin,event}
