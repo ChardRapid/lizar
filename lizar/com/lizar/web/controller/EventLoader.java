@@ -273,6 +273,10 @@ public class EventLoader {
 		Controller.template.handle(path,this);
 	}
 	
+	public void write_to_file(String path,String filepath) throws Exception{
+		Controller.template.write_to_file(path, this, filepath);
+	}
+	
 	public void print(String data,String type) throws IOException{
 		response.setContentType(type);
 		PrintWriter out = response.getWriter();

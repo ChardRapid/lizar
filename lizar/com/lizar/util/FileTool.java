@@ -23,6 +23,7 @@ import com.lizar.json.JList;
 import com.lizar.json.JObject;
 import com.lizar.json.JSON;
 import com.lizar.json.util.JSONParser;
+import com.lizar.web.config.Config;
 
 public class FileTool {
 	
@@ -126,13 +127,18 @@ public class FileTool {
 		return (JSON)JSONParser.parse(result);
 	}
 	
+	public static JSON read_json(File f,String encode_type){
+		String result=read_it(f,encode_type);
+		return (JSON)JSONParser.parse(result);
+	}
+	
 	public static String read_it(File file){
 		FileInputStream file_input = null;
 		BufferedReader br=null;
 		StringBuilder result=new StringBuilder("");
 		try {
 			file_input = new FileInputStream(file); 
-			 InputStreamReader read = new InputStreamReader(file_input);
+			 InputStreamReader read = new InputStreamReader(file_input,"utf-8");
 			 br = new BufferedReader(read); 
 			String line = br.readLine(); 
 			while(line!=null){

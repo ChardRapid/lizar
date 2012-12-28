@@ -650,6 +650,13 @@ public class FreemarkerSupport extends TemplateSupport {
 	        }
 		}
 
+		@Override
+		public void write_to_file(String path, EventLoader event_loader,
+				String filepath) throws Exception {
+			// TODO Auto-generated method stub
+			throw new Exception("currently freemarker is not support this method, pls try velocity");
+		}
+
 
 	
 

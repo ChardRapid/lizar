@@ -1,5 +1,6 @@
 package com.lizar.web.controller;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -29,7 +30,6 @@ import org.apache.velocity.util.SimplePool;
 
 import com.lizar.json.JSON;
 import com.lizar.web.Controller;
-import com.lizar.web.config.Config;
 
 public class VelocitySupport  extends TemplateSupport {
 	private ServletContext context;
@@ -177,7 +177,59 @@ public class VelocitySupport  extends TemplateSupport {
     private static SimplePool writerPool = new SimplePool(40);
 
   
-   
+    public  void write_to_file(String path,EventLoader eventLoader,String filepath)throws Exception {
+    	Context context = createContext( eventLoader.request(), eventLoader.response() );
+        setContentType( eventLoader.request(), eventLoader.response() );
+        Template template = this.getTemplate(path, Controller.encode_type);
+        if ( template == null )
+        {
+            return;
+        }
+        Enumeration em=eventLoader.request().getAttributeNames();
+        HttpServletRequest request=eventLoader.request();
+        HttpSession session=request.getSession();
+        ServletContext app=session.getServletContext();
+        for(;em.hasMoreElements();){
+        	Object o=em.nextElement();
+        	context.put(o.toString(), request.getAttribute(o.toString()));
+        }
+        em=session.getAttributeNames();
+        for(;em.hasMoreElements();){
+        	Object o=em.nextElement();
+        	if(request.getAttribute(o.toString())==null){
+        	context.put(o.toString(), session.getAttribute(o.toString()));
+        	}
+        }
+        em=app.getAttributeNames();
+        for(;em.hasMoreElements();){
+        	Object o=em.nextElement();
+        	if(request.getAttribute(o.toString())==null&&session.getAttribute(o.toString())==null){
+        	context.put(o.toString(), app.getAttribute(o.toString()));
+        	}
+        }
+        try
+        {
+            StringWriter sw = new StringWriter();
+            template.merge(context, sw);
+            PrintWriter filewriter = new PrintWriter(new File(filepath), Controller.encode_type);
+            filewriter.println(sw.toString());
+            filewriter.flush();
+            filewriter.close();
+           
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            /*
+             *  call cleanup routine to let a derived class do some cleanup
+             */
+
+            
+        }
+    }
 
 
     /**

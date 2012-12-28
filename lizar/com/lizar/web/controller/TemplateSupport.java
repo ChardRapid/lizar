@@ -51,4 +51,6 @@ abstract public class TemplateSupport {
 	 * @param event_loader resource and function owned by each request
 	 */
 	public abstract  void handle(String path,EventLoader event_loader)throws ServletException, IOException ;
+	
+	public abstract void write_to_file(String path,EventLoader event_loader,String filepath)throws  Exception ;
 }

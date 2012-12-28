@@ -232,7 +232,7 @@ public class I18Msg {
 		Map<String,String> res=new HashMap<String,String>();
 		BufferedReader reader=null;
         try {
-        	reader = new BufferedReader(new InputStreamReader(new FileInputStream(_f),Controller.encode_type));
+        	reader = new BufferedReader(new InputStreamReader(new FileInputStream(_f),"utf-8"));
             String tempString = null;
             int i=0;
             String[] arr=null;
@@ -381,7 +381,9 @@ public class I18Msg {
 		if(lan==null||lan.equals(""))return _default.map.get(key);
 		I18Resource rs=res.get(lan);
 		if(rs==null)rs= _default;
-		return rs.map.get(key);
+		lan=rs.map.get(key);
+		if(lan==null)return key;
+		return lan;
 	}
 	
 	public I18Resource get(String lan){
