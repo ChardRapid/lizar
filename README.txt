@@ -2,6 +2,9 @@ Lizar README
 
 Welcome to Lizar!
 
+Write JAVA code like PHP, fast and agent !
+
+
 1.	lizar通过内部完善的容错机制，实现了自动化IOC，将实现模块之间的高度依赖进行动态集成，不需要spring复杂的关联配置。 
 
 2.	Lizar能动态生成所有配置，并且所有配置能够伴随运行时修改生效，其中包含的Plugin定时器模块能够实现基于运行时的动态修改设定，不需要重启服务器。
