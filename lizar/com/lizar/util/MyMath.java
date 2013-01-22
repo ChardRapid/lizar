@@ -1,9 +1,13 @@
 package com.lizar.util;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Stack;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 public class MyMath {
 	public static void main(String[] args) {
@@ -26,6 +30,32 @@ public class MyMath {
 			}
 			return result.toString();
 			
+	}
+	
+	public static String encryptHMACMD5(String source, String authKey)
+	throws Exception {
+		final String KEY_MAC = "HmacMD5";
+		String str="";
+		try {
+			Mac lMac = Mac.getInstance(KEY_MAC);
+			SecretKeySpec lSecret = new SecretKeySpec(authKey.getBytes(), KEY_MAC);
+			lMac.init(lSecret);
+
+			byte[] b = lMac.doFinal(source.getBytes());
+
+			BigInteger hash = new BigInteger(1, b);
+			str = hash.toString(16);
+
+			if (str.length() % 2 != 0) {
+				str = "0" + str;
+			}
+	
+    
+		} catch (NoSuchAlgorithmException lEx) {
+			throw new RuntimeException("Problems calculating HMAC", lEx);
+		}
+
+		return str;
 	}
 	
 	public static long _60_to_10(String sixty_str){

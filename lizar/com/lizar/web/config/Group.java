@@ -51,7 +51,7 @@ public class Group {
 	
 	private Map<String,List<Explain>> group_map=new HashMap<String,List<Explain>>();
 	
-	public static final String FILE_PATH="/WEB-INF/lizar/group.json";
+	private static final String FILE_PATH="/WEB-INF/lizar/group.json";
 	
 	public ConfigFile cnf;
 	
@@ -72,7 +72,11 @@ public class Group {
 		Explain k;
 		for(Object obj:code_map.values()){
 			k=(Explain)obj;
+			try{
 			k.value=express(k.value);
+			}catch(Exception e){
+				k.value=k.value;
+			}
 		}
 	}
 	
@@ -143,6 +147,7 @@ public class Group {
 				exp=new JObject();
 				exp.put("code",e.code);
 				exp.put("value",e.value);
+				exp.put("desc", e.desc);
 				list.add(exp);
 			}
 			data.put(k+"", list);
@@ -169,6 +174,7 @@ public class Group {
 						exp.group=key;
 						exp.code=st._string("code");
 						exp.value=st.get("value");
+						exp.desc=st._string("desc");
 						set_to_list(exp);
 					}
 				}
@@ -206,6 +212,15 @@ public class Group {
 		exp.value=value;
 		set_to_list(exp);
 	}
+	
+	public static void set_up(String _group,String code,Object value,String desc){
+		Explain exp=new Explain();
+		exp.group=_group;
+		exp.code=code;
+		exp.value=value;
+		exp.desc=desc;
+		set_to_list(exp);
+	}
 
 	public void check() throws IOException{
 		if(!cnf.file.exists()){
@@ -227,6 +242,7 @@ public class Group {
 						exp.group=key;
 						exp.code=st._string("code");
 						exp.value=st.get("value");
+						exp.desc=st._string("desc");
 						set_to_list(exp);
 					}
 				}
@@ -305,6 +321,18 @@ public class Group {
 		Explain exp=get(fullcode);
 		if(exp==null)throw new GroupCodeIsNotExists(fullcode);
 		return (String)exp.value;
+	}
+	
+	public static String desc(String fullcode){
+		Explain exp=get(fullcode);
+		if(exp==null)throw new GroupCodeIsNotExists(fullcode);
+		return (String)exp.desc;
+	}
+	
+	public static String desc(String group,String code){
+		Explain exp=get(group+"."+code);
+		if(exp==null)throw new GroupCodeIsNotExists(group,code);
+		return (String)exp.desc;
 	}
 	
 }

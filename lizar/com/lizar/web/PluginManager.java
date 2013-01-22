@@ -54,6 +54,15 @@ public class PluginManager  extends Timer {
 	}
 	
 	public  void check(){
+		if(!plugin_folder.exists()){
+			log.warn("Lizar lizar/plugin folder is not exists, system will auto generate new folder in 1 minute");
+			try {
+				Thread.sleep(60*1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			plugin_folder.mkdirs();
+		}
 		for(Entry<String,Plugin> p:container.entrySet()){
 			if(!p.getValue().file.exists()){
 				try {

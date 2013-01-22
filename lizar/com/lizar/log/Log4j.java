@@ -62,5 +62,35 @@ public class Log4j implements Log{
 		log.warn(message,t);
 	}
 
+	@Override
+	public void debug(Throwable t) {
+		// TODO Auto-generated method stub
+		log.debug("", t);
+	}
+
+	@Override
+	public void error(Throwable t) {
+		// TODO Auto-generated method stub
+		log.error("", t);
+	}
+
+	@Override
+	public void info(Object obj) {
+		// TODO Auto-generated method stub
+		log.info(obj);
+	}
+
+	@Override
+	public void info(Throwable t) {
+		// TODO Auto-generated method stub
+		log.info("", t);
+	}
+
+	@Override
+	public void warn(Throwable t) {
+		// TODO Auto-generated method stub
+		log.warn("", t);
+	}
+
 
 }

@@ -24,47 +24,15 @@ public class ConfigManager extends Event {
 	}
 
 	@Override
-	public void handle(EventLoader event_loader) throws ServletException,
+	public void handle(EventLoader el) throws ServletException,
 			IOException {
 		// TODO Auto-generated method stub
-		String path=event_loader.request_path();
+		String path=el.request_path();
 		
 	}
 
-	@Override
-	public void handle_jsonp(EventLoader event_loader) throws ServletException,
-			IOException {
-		// TODO Auto-generated method stub
 
-	}
 
-	@Override
-	public void handle_json(EventLoader event_loader) throws ServletException,
-			IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void handle_xml(EventLoader event_loader) throws ServletException,
-			IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void before(EventLoader event_loader) throws ServletException,
-			IOException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void after(EventLoader event_loader) throws ServletException,
-			IOException {
-		// TODO Auto-generated method stub
-
-	}
 
 
 }

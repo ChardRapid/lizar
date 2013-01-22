@@ -113,7 +113,7 @@ public class Container {
 			}
 			if(start_list.size()==0||start_list.size()==s)need_to_end=true;
 			if(start_list.size()>0&&need_to_end){
-				log.error("Container init cell "+class_name+" init failed, caused by:",ex);
+				log.error("Container init cell "+class_name+" init failed pls make sure init_property is only for init property of class not to use then, caused by:",ex);
 			}
 		}
 	}

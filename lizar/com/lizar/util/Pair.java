@@ -8,6 +8,9 @@ public class Pair<T,T1> implements Entry<T,T1>{
 	
 	private T1 value;
 	
+	public Pair() {
+	}
+	
 	public Pair(T key,T1 value){
 		this.key=key;
 		this.value=value;

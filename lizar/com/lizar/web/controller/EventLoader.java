@@ -1,6 +1,7 @@
 package com.lizar.web.controller;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
@@ -19,6 +20,7 @@ import javax.servlet.http.HttpSession;
 
 import com.lizar.log.Log;
 import com.lizar.log.Logger;
+import com.lizar.util.FileTool;
 import com.lizar.util.StringHelper;
 import com.lizar.util.http.Http;
 import com.lizar.web.Controller;
@@ -166,19 +168,39 @@ public class EventLoader {
 		return response;
 	}
 	
+	/**
+	 * 
+	 * request a file content
+	 * 
+	 * */
 	public void request(String file) throws ServletException, IOException{
 		request.getRequestDispatcher(file).forward(request, response);
 		//chain.doFilter(request, response);
 	}
 	
+	/**
+	 * 
+	 * response to the root(server_info.root)
+	 * 
+	 * */
 	public void response_to_root() throws IOException{
 		response.sendRedirect(Config.xpath_str("server_info.root"));
 	}
 	
+	/**
+	 * 
+	 * response redirect
+	 * 
+	 * */
 	public void response(String url) throws IOException{
 		response.sendRedirect(url);
 	}
 	
+	/**
+	 * 
+	 * response redirect with cookie list
+	 * 
+	 * */
 	public void response(String url,List<Cookie> cl) throws IOException{
 		if(cl!=null){
 			for(Cookie c:cl){
@@ -188,12 +210,22 @@ public class EventLoader {
 		response.sendRedirect(url);
 	}
 	
+	/**
+	 * 
+	 * response redirect with cookie setting
+	 * 
+	 * */
 	public void response(String url,Cookie cookie) throws IOException{
 		response.addCookie(cookie);
 		response.sendRedirect(url);
 	}
 	
-	public String client_ip() {
+	/**
+	 * 
+	 * get customer's client ip
+	 * 
+	 * */
+	public String get_client_ip() {
 	       String ip = request.getHeader("x-forwarded-for");
 	       if(ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
 	           ip = request.getHeader("Proxy-Client-IP");
@@ -216,67 +248,165 @@ public class EventLoader {
 		return request_path;
 	}
 	
+	/**
+	 * 
+	 * request the path with split by /
+	 * 
+	 * like if request path is /user/setting/change
+	 * 
+	 * request_path(0) will be user
+	 * 
+	 * request_path(1) will be setting
+	 * 
+	 * request_path(2) will be change
+	 * 
+	 * request_path(3) will be ""
+	 * 
+	 * default will be "" string not null
+	 * 
+	 * */
 	public String request_path(int i){
 		if(i>-1&&i<path.size())return path.get(i);
 		return "";
 	}
 	
+	/**
+	 * 
+	 * get the web physical path
+	 * 
+	 * */
 	public String real_path(){
 		return context.getRealPath("");
 	}
 	
+	/**
+	 * 
+	 * get the web physical path with a sub_path
+	 * 
+	 * */
 	public String real_path(String sub_path){
 		return context.getRealPath(sub_path);
 	}
 	
+	/**
+	 * 
+	 * get the web context name
+	 * 
+	 * */
 	public String context_name(){
 		return request.getContextPath();
 	}
 	
-	
+	/**
+	 * 
+	 * return the file_content as a xml type
+	 * 
+	 * if you want to return a xml file path a giving path, pls try EventLoader.file(path,need_cache) method
+	 * 
+	 * */
 	public void xml(String file_content) throws IOException{
 		print(file_content,"application/xml");
 	}
 	
+	
+	/**
+	 * 
+	 * return a text content as text/plain
+	 * 
+	 * if you want to return a txt file path a giving path, pls try EventLoader.file(path,need_cache) method
+	 * 
+	 * */
 	public void text(String content) throws IOException{
 		print(content,"text/plain");
 	}
 	
+	/**
+	 * 
+	 * return a output_data  as text/json
+	 * 
+	 * */
 	public void json(String output_data) throws IOException{
 		print(output_data,"text/json");
 	}
 	
+	/**
+	 * 
+	 * response a 404 with output_data 
+	 * 
+	 * */
 	public void not_found(String output_data) throws IOException{
 		response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 		print(output_data,"text/plain");
 	}
 	
+	/**
+	 * 
+	 * return jsonp with function and json filled
+	 * 
+	 * */
 	public void jsonp(String fn,String json) throws IOException{
 		StringBuilder res=new StringBuilder(fn);
 		res.append("(").append(json).append(");");
 		print(res.toString(),"text/json");
 	}
 	
+	/**
+	 * 
+	 * return a html output_data with server_info.encode_type encode type
+	 * 
+	 * if you want to return a html file path a giving path, pls try EventLoader.file(path,need_cache) method
+	 * */
 	public void html(String output_data)throws IOException{
 		print(output_data,"text/html;charset="+Controller.encode_type);
 	}
 	
+
+	
+	/**
+	 * 
+	 * return a static file with path
+	 * 
+	 * it can be txt/xml/html/js/css/jpg/flv or any static file
+	 * 
+	 * */
 	public void file(String path) throws IOException{
 		file(path,true);
 	}
 	
+	/**
+	 * 
+	 * return a static file with path check if need cache
+	 * 
+	 * it can be txt/xml/html/js/css/jpg/flv or any static file
+	 * 
+	 * */
 	public void file(String path,boolean need_cache) throws IOException{
 		StaticResource.handle(this, path, need_cache);
 	}
 	
+	/**
+	 * 
+	 * use template support to parse the template
+	 * 
+	 * */
 	public void template(String path) throws IOException, ServletException{
 		Controller.template.handle(path,this);
 	}
 	
-	public void write_to_file(String path,String filepath) throws Exception{
+	/**
+	 * 
+	 * write the template file and  parse it with EventLoader setting data to a file
+	 * 
+	 * */
+	public void write_template_to_file(String path,String filepath) throws Exception{
 		Controller.template.write_to_file(path, this, filepath);
 	}
 	
+	/**
+	 * 
+	 * print data with content type
+	 * 
+	 * */
 	public void print(String data,String type) throws IOException{
 		response.setContentType(type);
 		PrintWriter out = response.getWriter();
@@ -383,6 +513,13 @@ public class EventLoader {
 		return request.getCharacterEncoding();
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value 0
+	 * 
+	 * */
 	public int _int(String key){
 		Object v=request.getParameter(key);
 		if(v==null)return 0;
@@ -395,6 +532,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value:defv
+	 * 
+	 * */
 	public int _int(String key,int defv){
 		
 		Object v=request.getParameter(key);
@@ -408,6 +552,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value ""
+	 * 
+	 * */
 	public String _str(String key){
 		Object v=request.getParameter(key);
 		if(v==null)return "";
@@ -416,6 +567,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value:defv
+	 * 
+	 * */
 	public String _str(String key,String defv){
 		Object v=request.getParameter(key);
 		if(v==null)return defv;
@@ -424,6 +582,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value 0
+	 * 
+	 * */
 	public long _long(String key){
 		Object v=request.getParameter(key);
 		if(v==null)return 0;
@@ -436,6 +601,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value:defv
+	 * 
+	 * */
 	public long _long(String key,long _default){
 		Object v=request.getParameter(key);
 		if(v==null)return _default;
@@ -448,6 +620,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value 0
+	 * 
+	 * */
 	public double _double(String key){
 		Object v=request.getParameter(key);
 		if(v==null)return 0;
@@ -460,6 +639,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value:defv
+	 * 
+	 * */
 	public double _double(String key,double _default){
 		Object v=request.getParameter(key);
 		if(v==null)return _default;
@@ -472,6 +658,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value 0
+	 * 
+	 * */
 	public float _float(String key){
 		Object v=request.getParameter(key);
 		if(v==null)return 0;
@@ -484,6 +677,13 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameter("parameter_name")
+	 * 
+	 * if result is null , will return default value:defv
+	 * 
+	 * */
 	public float _float(String key,float _default){
 		Object v=request.getParameter(key);
 		if(v==null)return _default;
@@ -496,14 +696,36 @@ public class EventLoader {
 		}
 	}
 	
+	/**
+	 * 
+	 * request.getParameterValues(key);
+	 * return muti-value with a key
+	 * 
+	 * */
 	public String[] params(String key){
 		return request.getParameterValues(key);
 	}
 	
-	public Object param(String key){
+	/**
+	 * 
+	 * classic
+	 * request.getParameter(key);
+	 * 
+	 * 
+	 * */
+	public String param(String key){
 		return request.getParameter(key);
 	}
 	
+	/**
+	 * 
+	 * classic
+	 * 
+	 * request.getParameter(key);
+	 * 
+	 * if it is null then will return _default value
+	 * 
+	 * */
 	private <T> T param(String key,T _default){
 		Object v=request.getParameter(key);
 		if(v==null)return _default;
@@ -527,6 +749,14 @@ public class EventLoader {
 		response.setDateHeader(key, value);
 	}
 	
+	public String get_user_agent(){
+		return request.getHeader("user-agent");
+	}
+	
+	public String get_referer(){
+		return request.getHeader("Referer");
+	}
+	
 	/**
 	 * 
 	 * if front gives you the encoded string like gb2312
@@ -542,10 +772,10 @@ public class EventLoader {
 	 *    
 	 *    Event{
 	 *    
-	 *    	    handle(EventLoader event_loader){
+	 *    	    handle(EventLoader el){
 	 *    			
-	 *    			event_loader.encode_params("ISO-8859-1");
-	 *    			String value=event_loader.param("name","_default_value","gb2312",true);
+	 *    			el.encode_params("ISO-8859-1");
+	 *    			String value=el.param("name","_default_value","gb2312",true);
 	 *    			.
 	 *    			.
 	 *    			.

@@ -216,6 +216,13 @@ public class Keys {
 	
 	public void check() throws IOException{
 		if(!cnf.file.exists()){
+			log.warn("Lizar keys file or dir is not exists, system will auto generate new config keys.json in 1 minute");
+			try {
+				Thread.sleep(60*1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			cnf.file.getParentFile().mkdirs();
 			FileTool.write_to_file(to_store_list(), cnf.file);
 			cnf.last_modify=cnf.file.lastModified();
 			return;

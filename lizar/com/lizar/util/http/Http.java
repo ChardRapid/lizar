@@ -86,13 +86,13 @@ public class Http {
 		return s.toString();
 	}
 	
-	 public static String get_encode_type(String content_type,String default_content_type){
+	public static String get_encode_type(String content_type,String default_content_type){
 		 if(StringHelper.isNull(content_type))return default_content_type;
 			int pos=content_type.toLowerCase().indexOf("charset=")+8;
 			int last_pos=content_type.indexOf(";", pos);
 			if(last_pos==-1)return content_type.substring(pos, content_type.length()).trim();
 			return content_type.substring(pos, last_pos).trim();
-		}
+	}
 	
 	public static boolean is_local_url(String domain){
 		if(domain.startsWith("10.")||domain.startsWith("192.168."))return true;
@@ -126,6 +126,13 @@ public class Http {
 	public static String escape(String param){
 		if(StringHelper.isNull(param))return "";
 		return param.replaceAll("'","\"");
+	}
+	
+
+	public static String _p_flter(String content) {
+		content = content.replaceAll("<p>", "");
+		content = content.replaceAll("</p>", "");
+		return content;
 	}
 	
 	public static String getWebPath(HttpServletRequest request,String path){
@@ -343,6 +350,21 @@ public class Http {
 		return content.toString();
 	}
 	
+	public static String get(String url,String encode) throws IOException {
+		StringBuilder content=new StringBuilder();
+		URL netUrl=new URL(url);
+		HttpURLConnection httpConn= (HttpURLConnection) netUrl.openConnection();
+		httpConn.connect();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(httpConn.getInputStream(),encode)); 
+		String temp;
+		while((temp=reader.readLine())!=null){
+			content.append(temp);
+		}
+		reader.close();
+		httpConn.disconnect();
+		return content.toString();
+	}
+	
 	public static String check_domain(String domain){
 		if(StringHelper.isNull(domain))return "domain is null";
 		char start=domain.charAt(0);
@@ -417,6 +439,18 @@ public class Http {
 	        return str;
 	    }
 	
+	   public static String avoid_tag(String html) {
+			if (StringHelper.isNotNull(html)) {
+				html = html.replaceAll("\n", " ");
+				html = html.replaceAll("\t", " ");
+				html = html.replaceAll("<", "&lt;");
+				html = html.replaceAll(">", "&gt;");
+				html = html.replaceAll("'", "&apos;");
+				html = html.replaceAll("\"", "&qout;");
+			}
+			return html;
+		}
+	   
 	public static void main(String[] args) throws IOException{
 	
 		

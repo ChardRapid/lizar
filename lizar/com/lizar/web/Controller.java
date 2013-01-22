@@ -22,12 +22,17 @@ import com.lizar.log.Logger;
 import com.lizar.util.FileTool;
 import com.lizar.util.StringHelper;
 import com.lizar.web.config.Config;
+import com.lizar.web.controller.After;
+import com.lizar.web.controller.Before;
 import com.lizar.web.controller.ContentType;
 import com.lizar.web.controller.Event;
 import com.lizar.web.controller.EventInterceptor;
 import com.lizar.web.controller.EventLoader;
+import com.lizar.web.controller.JSONHandler;
+import com.lizar.web.controller.JSONPHandler;
 import com.lizar.web.controller.StaticResource;
 import com.lizar.web.controller.TemplateSupport;
+import com.lizar.web.controller.XMLHandler;
 import com.lizar.web.loader.I18Resource;
 
 /**
@@ -482,32 +487,32 @@ public class Controller{
 			if(visit_uri.indexOf("*")==-1)return SEARCH_PRIORITY_MINOR;
 		}
 		
-		throw new EventHandlingPathIsNotSupported(visit_uri+" is currently not supported in chard controller uri interceptor pattern");
+		throw new EventHandlingPathIsNotSupported(visit_uri+" is currently not supported in  controller uri interceptor pattern");
 	}
     
-	private void _handle(Event handler,String path,EventLoader event_loader) throws ServletException, IOException{
+	private void _handle(Event handler,String path,EventLoader el) throws ServletException, IOException{
 		if(path.indexOf(".")==-1){
-			handler.before(event_loader);
-			handler.handle(event_loader);
-			handler.after(event_loader);
+			if(handler instanceof Before)((Before)handler).before(el);
+			handler.handle(el);
+			if(handler instanceof After)((After)handler).after(el);
 		}else if(path.endsWith(".json")){
-			handler.before(event_loader);
-			handler.handle_json(event_loader);
-			handler.after(event_loader);
+			if(handler instanceof Before)((Before)handler).before(el);
+			if(handler instanceof JSONHandler)((JSONHandler)handler).handle_json(el);
+			if(handler instanceof After)((After)handler).after(el);
 		}else if(path.endsWith(".xml")){
-			handler.before(event_loader);
-			handler.handle_xml(event_loader);
-			handler.after(event_loader);
+			if(handler instanceof Before)((Before)handler).before(el);
+			if(handler instanceof XMLHandler)((XMLHandler)handler).handle_xml(el);
+			if(handler instanceof After)((After)handler).after(el);
 		}else if(path.endsWith(".jsonp")){
-			handler.before(event_loader);
-			handler.handle_jsonp(event_loader);
-			handler.after(event_loader);
+			if(handler instanceof Before)((Before)handler).before(el);
+			if(handler instanceof JSONPHandler)((JSONPHandler)handler).handle_jsonp(el);
+			if(handler instanceof After)((After)handler).after(el);
 		}else{
-			StaticResource.handle(event_loader, path, true);
+			StaticResource.handle(el, path, true);
 		}
-		if(int_cpt!=null&&event_loader.need_after){
-			int_cpt.after(event_loader);
-			event_loader.need_after=false;
+		if(int_cpt!=null&&el.need_after){
+			int_cpt.after(el);
+			el.need_after=false;
 		}
 	}
     
@@ -530,44 +535,44 @@ public class Controller{
 		pre_init(request,response);
 		String post_fix=postfix(path);
 		boolean need_before=true;
-		EventLoader event_loader =(EventLoader)request.getAttribute("com.lizar.web.controller.eventloader");
-		if(event_loader==null){
-			event_loader=new EventLoader( path,request, response);
-			request.setAttribute("com.lizar.web.controller.eventloader", event_loader);
+		EventLoader el =(EventLoader)request.getAttribute("com.lizar.web.controller.eventloader");
+		if(el==null){
+			el=new EventLoader( path,request, response);
+			request.setAttribute("com.lizar.web.controller.eventloader", el);
 		}else need_before=false;
-		if(int_cpt!=null&&need_before)int_cpt.before(event_loader);
-		event_loader.postfix(post_fix);
-		event_loader.lan=request.getLocale().getLanguage();
+		if(int_cpt!=null&&need_before)int_cpt.before(el);
+		el.postfix(post_fix);
+		el.lan=request.getLocale().getLanguage();
 		if(StringHelper.isNotNull(post_fix)&&template!=null&&template.listen().indexOf(post_fix)!=-1){
-			template.handle(path,event_loader);
-			if(int_cpt!=null&&event_loader.need_after){
-				int_cpt.after(event_loader);
-				event_loader.need_after=false;
+			template.handle(path,el);
+			if(int_cpt!=null&&el.need_after){
+				int_cpt.after(el);
+				el.need_after=false;
 			}
 			return;
 		}
 		Event event=seek_event_handler(path.toLowerCase());
 		if(event==null||!event.enable){
-			handle_404(event_loader);
+			handle_404(el);
 		} else{
 			try{
-				_handle(event,path,event_loader);
+				_handle(event,path,el);
 			}catch(Exception e){
 				log.error("request:"+path+" throw a exception in "+event.getClass().getName(),e);
-				handle_500(event_loader);
+				handle_500(el);
 			}
 		}
 	}
 	
-	private void handle_404(EventLoader event_loader) throws IOException, ServletException{
-		String path=event_loader.request_path();
+	private void handle_404(EventLoader el) throws IOException, ServletException{
+		String path=el.request_path();
 		String post_fix=postfix(path);
 		String full_path=Config.path_filter("/WEB-INF/lizar/404."+post_fix, "");
 		File _404=new File(full_path);
 		if(_404.isFile()){
-			StaticResource.handle_abs_file(event_loader, full_path, true,HttpServletResponse.SC_NOT_FOUND);
+			StaticResource.handle_abs_file(el, full_path, true,HttpServletResponse.SC_NOT_FOUND);
 		}else{
-			event_loader.postfix("html");
+			el.postfix("html");
 			full_path=Config.path_filter("/WEB-INF/lizar/404.html");
 			if(!_404.exists()){
 				_404=new File(full_path);
@@ -578,20 +583,20 @@ public class Controller{
 				_404=new File(full_path);
 				FileTool.write_to_file("The event you are looking for is not exists, if you want to change the 404 content, pls replace the file /WEB-INF/lizar/404.html",_404);
 			}
-			StaticResource.handle_abs_file(event_loader, full_path, true,HttpServletResponse.SC_NOT_FOUND);
+			StaticResource.handle_abs_file(el, full_path, true,HttpServletResponse.SC_NOT_FOUND);
 		}
-		if(int_cpt!=null)int_cpt.after(event_loader);
+		if(int_cpt!=null)int_cpt.after(el);
 	}
 
-	private void handle_500(EventLoader event_loader) throws IOException, ServletException{
-		String path=event_loader.request_path();
+	private void handle_500(EventLoader el) throws IOException, ServletException{
+		String path=el.request_path();
 		String post_fix=postfix(path);
 		String full_path=Config.path_filter("/WEB-INF/lizar/500."+post_fix, "");
 		File _500=new File(full_path);
 		if(_500.isFile()){
-			StaticResource.handle_abs_file(event_loader, full_path, true,HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			StaticResource.handle_abs_file(el, full_path, true,HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}else{
-			event_loader.postfix("html");
+			el.postfix("html");
 			full_path=Config.path_filter("/WEB-INF/lizar/500.html");
 			if(!_500.exists()){
 				_500=new File(full_path);
@@ -602,9 +607,9 @@ public class Controller{
 				_500=new File(full_path);
 				FileTool.write_to_file( "The event you visit get a server internal exception, if you want to change the 500 content, pls replace the file /WEB-INF/lizar/500.html",_500);
 			}
-			StaticResource.handle_abs_file(event_loader, full_path, true,HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			StaticResource.handle_abs_file(el, full_path, true,HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 		}
-		if(int_cpt!=null)int_cpt.after(event_loader);
+		if(int_cpt!=null)int_cpt.after(el);
 	}
 	
 

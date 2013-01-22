@@ -73,4 +73,34 @@ public class Console implements Log {
 		System.out.println(arr[1]);
 	}
 
+	@Override
+	public void debug(Throwable t) {
+		System.out.println("[Console debug]"+_t);
+		t.printStackTrace();
+	}
+
+	@Override
+	public void error(Throwable t) {
+		System.out.println("[Console error]"+_t);
+		t.printStackTrace();
+	}
+
+	@Override
+	public void info(Object obj) {
+		System.out.println("[Console info]"+_t);
+		System.out.println(obj);
+	}
+
+	@Override
+	public void info(Throwable t) {
+		System.out.println("[Console info]"+_t);
+		t.printStackTrace();
+	}
+
+	@Override
+	public void warn(Throwable t) {
+		System.out.println("[Console warn]"+_t);
+		t.printStackTrace();
+	}
+
 }

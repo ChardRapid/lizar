@@ -57,37 +57,11 @@ abstract public class Event implements Cell{
 	
 	/**
 	 * @task invoked by controller,handle user request
-	 * @param event_loader resource and function owned by each request
+	 * @param el resource and function owned by each request
 	 */
 	public abstract void handle(EventLoader el)throws ServletException, IOException ;
 	
 
-	/**
-	 * @task invoked by controller,handle user request
-	 * @param event_loader resource and function owned by each request
-	 */
-	public abstract void handle_jsonp(EventLoader el)throws ServletException, IOException ;
 
-	/**
-	 * @task invoked by controller,handle user request
-	 * @param event_loader resource and function owned by each request
-	 */
-	public abstract  void handle_json(EventLoader el)throws ServletException, IOException ;
-	
-
-	/**
-	 * @task invoked by controller,handle user request
-	 * @param event_loader resource and function owned by each request
-	 */
-	public abstract void handle_xml(EventLoader el)throws ServletException, IOException ;
-	
-	/**
-	 * @task invoked by controller,handle user request
-	 * @param event_loader resource and function owned by each request
-	 */
-	public abstract  void before(EventLoader el)throws ServletException, IOException ;
-	
-	public abstract  void after(EventLoader el)throws ServletException, IOException ;
-	
 	
 }

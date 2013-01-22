@@ -9,6 +9,8 @@ public class Explain {
 	
 	public Object  value;
 	
+	public String desc;
+	
 	public String full_code(){
 		return group+"."+code;
 	}
@@ -19,6 +21,7 @@ public class Explain {
 		expl.group=e._string("group");
 		expl.code=e._string("code");
 		expl.value=e._string("value");
+		expl.desc=e._string("desc");
 		return expl;
 	}
 	

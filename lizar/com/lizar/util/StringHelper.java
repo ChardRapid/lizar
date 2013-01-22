@@ -141,7 +141,7 @@ public class StringHelper {
 		if(StringHelper.isNull(str))return false;
 		for(int i=0;i<str.length();i++){
 			c=str.charAt(i);
-			if(!((c<='9'&&c>='0') || (c<='z'&& c>='a') || (c<='Z'&&c>='A') || c=='_')||(c>='\u4E00'&&c<='\u9FA5')){
+			if(!((c<='9'&&c>='0') || (c<='z'&& c>='a') || (c<='Z'&&c>='A') || c=='_'||(c>='\u4E00'&&c<='\u9FA5'))){
 				return false;
 			}
 		}
@@ -231,6 +231,6 @@ public class StringHelper {
 	 
 	 
 	public static void main(String[] args) {
-		
+		System.out.println(is_chinese_char("棉鞋"));
 	}
 }

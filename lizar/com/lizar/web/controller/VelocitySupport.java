@@ -35,28 +35,28 @@ public class VelocitySupport  extends TemplateSupport {
 	private ServletContext context;
 	
 	@Override
-	public void handle(EventLoader eventLoader) throws ServletException,
+	public void handle(EventLoader el) throws ServletException,
 			IOException {
-        handle(eventLoader.request().getPathInfo(),eventLoader);
+        handle(el.request().getPathInfo(),el);
 	}
 
 	@Override
-	public void handle(String path, EventLoader eventLoader)
+	public void handle(String path, EventLoader el)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		// TODO Auto-generated method stub
 				Context context = null;
 		        try
 		        {
-		            context = createContext( eventLoader.request(), eventLoader.response() );
-		            setContentType( eventLoader.request(), eventLoader.response() );
+		            context = createContext( el.request(), el.response() );
+		            setContentType( el.request(), el.response() );
 		            Template template = this.getTemplate(path, Controller.encode_type);
 		            if ( template == null )
 		            {
 		                return;
 		            }
-		            Enumeration em=eventLoader.request().getAttributeNames();
-		            HttpServletRequest request=eventLoader.request();
+		            Enumeration em=el.request().getAttributeNames();
+		            HttpServletRequest request=el.request();
 		            HttpSession session=request.getSession();
 		            ServletContext app=session.getServletContext();
 		            for(;em.hasMoreElements();){
@@ -77,11 +77,11 @@ public class VelocitySupport  extends TemplateSupport {
 		            	context.put(o.toString(), app.getAttribute(o.toString()));
 		            	}
 		            }
-		            mergeTemplate( template, context, eventLoader.response() );
+		            mergeTemplate( template, context, el.response() );
 		        }
 		        catch (Exception e)
 		        {
-		            error( eventLoader.request(), eventLoader.response(), e);
+		            error( el.request(), el.response(), e);
 		        }
 		        finally
 		        {
@@ -177,16 +177,16 @@ public class VelocitySupport  extends TemplateSupport {
     private static SimplePool writerPool = new SimplePool(40);
 
   
-    public  void write_to_file(String path,EventLoader eventLoader,String filepath)throws Exception {
-    	Context context = createContext( eventLoader.request(), eventLoader.response() );
-        setContentType( eventLoader.request(), eventLoader.response() );
+    public  void write_to_file(String path,EventLoader el,String filepath)throws Exception {
+    	Context context = createContext( el.request(), el.response() );
+        setContentType( el.request(), el.response() );
         Template template = this.getTemplate(path, Controller.encode_type);
         if ( template == null )
         {
             return;
         }
-        Enumeration em=eventLoader.request().getAttributeNames();
-        HttpServletRequest request=eventLoader.request();
+        Enumeration em=el.request().getAttributeNames();
+        HttpServletRequest request=el.request();
         HttpSession session=request.getSession();
         ServletContext app=session.getServletContext();
         for(;em.hasMoreElements();){

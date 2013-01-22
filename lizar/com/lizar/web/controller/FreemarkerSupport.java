@@ -50,12 +50,12 @@ public class FreemarkerSupport extends TemplateSupport {
 	private Log log=Logger.newInstance(this.getClass());
 	private ServletContext context;
 	@Override
-	public void handle(String path, EventLoader event_loader)
+	public void handle(String path, EventLoader el)
 			throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		 // Give chance to subclasses to perform preprocessing
-		HttpServletRequest request=event_loader.request();
-		HttpServletResponse response=event_loader.response();
+		HttpServletRequest request=el.request();
+		HttpServletResponse response=el.response();
         config.setEncoding(request.getLocale(), Controller.encode_type);
         log.info( "Requested template: " + path);
         Template template = null;
@@ -118,9 +118,9 @@ public class FreemarkerSupport extends TemplateSupport {
         }
 	}
 	
-	public void handle(EventLoader event_loader) throws ServletException, IOException {
+	public void handle(EventLoader el) throws ServletException, IOException {
        
-		this.handle(requestUrlToTemplatePath(event_loader.request), event_loader);
+		this.handle(requestUrlToTemplatePath(el.request()), el);
 	}
 
 	
@@ -542,7 +542,6 @@ public class FreemarkerSupport extends TemplateSupport {
 
 		@Override
 		public String default_listen() {
-			// TODO Auto-generated method stub
 			return "ftl";
 		}
 
@@ -651,9 +650,8 @@ public class FreemarkerSupport extends TemplateSupport {
 		}
 
 		@Override
-		public void write_to_file(String path, EventLoader event_loader,
+		public void write_to_file(String path, EventLoader el,
 				String filepath) throws Exception {
-			// TODO Auto-generated method stub
 			throw new Exception("currently freemarker is not support this method, pls try velocity");
 		}
 

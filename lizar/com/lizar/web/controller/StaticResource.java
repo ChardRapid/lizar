@@ -97,72 +97,72 @@ public class StaticResource {
 	}
 	
 	
-	public static void handle(EventLoader event_loader,String path) {
-		handle(event_loader,path,true);
+	public static void handle(EventLoader el,String path) {
+		handle(el,path,true);
 	}
 	
-	public static void handle(EventLoader event_loader,String path,boolean need_cache) {
-		path=event_loader.real_path(path);
-		handle_abs_file(event_loader,path,need_cache);
+	public static void handle(EventLoader el,String path,boolean need_cache) {
+		path=el.real_path(path);
+		handle_abs_file(el,path,need_cache);
 	}
 	
-	public static void handle_abs_file(EventLoader event_loader,String path,boolean need_cache) {
-		HttpServletResponse response=event_loader.response();
-		response.setContentType(ContentType.is(event_loader.postfix()));
+	public static void handle_abs_file(EventLoader el,String path,boolean need_cache) {
+		HttpServletResponse response=el.response();
+		response.setContentType(ContentType.is(el.postfix()));
 		response.setCharacterEncoding(Controller.encode_type);
 		if(need_cache){
 			Resource file=file_map.get(MyMath.encryptionWithMD5(path));
 			if(file!=null){
 				file.use++;
-				write(file.list,event_loader);
+				write(file.list,el);
 			}else{
-				read_file(event_loader,path,need_cache);
+				read_file(el,path,need_cache);
 			}
 		}else{
-			read_file(event_loader,path,need_cache);
+			read_file(el,path,need_cache);
 		}
 		
 	}
-	public static void handle_abs_file(EventLoader event_loader,String path,boolean need_cache,int response_code) {
-		HttpServletResponse response=event_loader.response();
+	public static void handle_abs_file(EventLoader el,String path,boolean need_cache,int response_code) {
+		HttpServletResponse response=el.response();
 		response.setStatus(response_code);
-		handle_abs_file(event_loader,path,need_cache);
+		handle_abs_file(el,path,need_cache);
 	}
 	
-	private static void response_not_found(EventLoader event_loader,String path){
-		event_loader.response().setStatus(HttpServletResponse.SC_NOT_FOUND);
-		String _404_file=event_loader.context.getRealPath("/WEB-INF/lizar/404.")+event_loader.postfix();
+	private static void response_not_found(EventLoader el,String path){
+		el.response().setStatus(HttpServletResponse.SC_NOT_FOUND);
+		String _404_file=el.context.getRealPath("/WEB-INF/lizar/404.")+el.postfix();
 		Resource file=file_map.get(MyMath.encryptionWithMD5(_404_file));
 		if(file==null){
-			if(StringHelper.isNull(event_loader.postfix()))event_loader.postfix("html");
-			File f=new File(event_loader.context.getRealPath("/WEB-INF/lizar/404.")+event_loader.postfix());
+			if(StringHelper.isNull(el.postfix()))el.postfix("html");
+			File f=new File(el.context.getRealPath("/WEB-INF/lizar/404.")+el.postfix());
 			if(!f.exists()){
 				try {
 					FileTool.write_to_file("404 page for default postfix",f);
 				} catch (IOException e) {
-					event_loader.log.error(path+" read exception.",e);
+					el.log.error(path+" read exception.",e);
 				}
 			}
-			read_file_in_not_found(event_loader,f);
-		}else write(file.list,event_loader);
+			read_file_in_not_found(el,f);
+		}else write(file.list,el);
 	}
 	
-	private static void read_file_in_not_found(EventLoader event_loader,File f) {
+	private static void read_file_in_not_found(EventLoader el,File f) {
 		Pair<Long,List<String>> b=null;
 		try {
 			b = read(f);
 		} catch (FileNotFoundException e) {
-			event_loader.log.error("request:"+event_loader.request_path()+" read failed for read file "+f.getPath(),e);
+			el.log.error("request:"+el.request_path()+" read failed for read file "+f.getPath(),e);
 			try {
-				event_loader.text("404 page for default postfix");
+				el.text("404 page for default postfix");
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
 			return;
 		}  catch (IOException e) {
-			event_loader.log.error("request:"+event_loader.request_path()+" read failed for read file "+f.getPath(),e);
+			el.log.error("request:"+el.request_path()+" read failed for read file "+f.getPath(),e);
 			try {
-				event_loader.text("404 page for default postfix");
+				el.text("404 page for default postfix");
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -170,7 +170,7 @@ public class StaticResource {
 		}
 		if(b==null||b.getValue().isEmpty()){
 			try {
-				event_loader.text("404 page for default postfix");
+				el.text("404 page for default postfix");
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -182,24 +182,24 @@ public class StaticResource {
 				file.last_modify_time=last_modify_time(f.getPath());
 				file_map.put(MyMath.encryptionWithMD5(f.getPath()), file);
 			}
-			write(b.getValue(),event_loader);
+			write(b.getValue(),el);
 		}
 	}
 	
-	private static void read_file(EventLoader event_loader,String path,boolean need_cache) {
+	private static void read_file(EventLoader el,String path,boolean need_cache) {
 		Pair<Long,List<String>> b=null;
 		try {
 			b = read(path);
 		} catch (FileNotFoundException e) {
-			response_not_found(event_loader,path);
+			response_not_found(el,path);
 			return;
 		} catch (IOException e) {
-			event_loader.log.error("request:"+event_loader.request_path()+" read failed for read file "+path,e);
-			response_not_found(event_loader,path);
+			el.log.error("request:"+el.request_path()+" read failed for read file "+path,e);
+			response_not_found(el,path);
 			return;
 		}
 		if(b==null||b.getValue().isEmpty()){
-			response_not_found(event_loader,path);
+			response_not_found(el,path);
 			return;
 		}else{
 			if(need_cache&&b.getKey()<instance.file_max_size){
@@ -208,7 +208,7 @@ public class StaticResource {
 				r.last_modify_time=last_modify_time(path);
 				file_map.put(MyMath.encryptionWithMD5(path), r);
 			}
-			write(b.getValue(),event_loader);
+			write(b.getValue(),el);
 		}
 	}
 	
@@ -254,17 +254,17 @@ public class StaticResource {
 	}
 	
 	
-	private static void write(List<String> list,EventLoader event_loader) {
+	private static void write(List<String> list,EventLoader el) {
 		PrintWriter out  = null;
 		try {
-			out = event_loader.response().getWriter();
+			out = el.response().getWriter();
 			Iterator<String> itr=list.iterator();
 			for(;itr.hasNext();){
 				out.write(itr.next());
 			}
 			out.flush();
 		}catch(Exception e){
-			event_loader.log.error("Response output stream exception in "+event_loader.request_path(), e);
+			el.log.error("Response output stream exception in "+el.request_path(), e);
 		}finally{
 			if(out != null)out.close();
 		}

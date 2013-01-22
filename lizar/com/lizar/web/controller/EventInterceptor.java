@@ -11,7 +11,7 @@ import javax.servlet.ServletException;
  */
 public interface EventInterceptor {
 	
-	void before(EventLoader event_loader) throws ServletException, IOException;
+	void before(EventLoader el) throws ServletException, IOException;
 	
-	void after(EventLoader event_loader) throws ServletException, IOException;
+	void after(EventLoader el) throws ServletException, IOException;
 }
