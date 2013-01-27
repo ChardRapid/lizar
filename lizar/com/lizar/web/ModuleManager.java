@@ -3,10 +3,12 @@ package com.lizar.web;
 import java.util.List;
 import java.util.Map;
 
+import com.lizar.exception.NotDefined;
 import com.lizar.log.Log;
 import com.lizar.log.Logger;
 import com.lizar.util.CollectionHelper;
 import com.lizar.web.loader.Module;
+import com.lizar.web.loader.Plugin;
 
 public class ModuleManager {
 	
@@ -25,6 +27,19 @@ public class ModuleManager {
 	public static ModuleManager instance(){
 		if(module_manager==null)module_manager=new ModuleManager();
 		return module_manager;
+	}
+	
+
+	public static  <T> T getModule(Class<T> t){
+		T e=null;
+		if(container==null){
+			e= Web.get(t);
+			if(!(e instanceof Plugin)||e==null)throw new NotDefined("Module "+t.getName()+" not found in the container pls make sure it is exsits");
+			return e;
+		}
+		e=(T)container.get(t.getName());
+		if(e==null)throw new NotDefined("Module "+t.getName()+" not found in the container pls make sure it is exsits");
+		return e;
 	}
 	
 	private void init_modules(){
