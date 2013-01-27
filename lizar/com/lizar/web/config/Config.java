@@ -297,6 +297,7 @@ public class Config {
 		Web.controller._check_interceptor(xpath_str("event.interceptor", ""));
 //		Web.controller._check_default_event(xpath_str("event.default_event",""));
 		Web.controller._check_vars(xpath_entity("event.global_var"));
+		Web.controller._check_exception_recorder(xpath_str("event.exception_recorder", ""));
 	}
 	
 	private void check_event(JSON entity){
@@ -306,6 +307,7 @@ public class Config {
 			return;
 		}
 		event.put("interceptor",event._string("interceptor",""));
+		event.put("exception_handler",event._string("exception_recorder",""));
 		if(event.get("global_var")==null)event.put("global_var", new JObject());
 		entity.put("event", event);
 	}
@@ -787,6 +789,7 @@ public class Config {
 			event=new JObject();
 		}
 		event.put("interceptor",event._string("interceptor",""));
+		event.put("exception_recorder",event._string("exception_recorder",""));
 		if(event.get("global_var")==null)event.put("global_var", new JObject());
 		org_config.put("event", event);
 	}

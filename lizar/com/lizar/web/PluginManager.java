@@ -4,19 +4,18 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
-import java.util.Set;
 import java.util.Timer;
+import java.util.Map.Entry;
 
 import com.lizar.exception.NotDefined;
 import com.lizar.log.Log;
 import com.lizar.log.Logger;
+import com.lizar.util.CollectionHelper;
 import com.lizar.util.PropertyHandler;
 import com.lizar.util.StringHelper;
 import com.lizar.util.Time;
@@ -47,10 +46,9 @@ public class PluginManager  extends Timer {
 	
 	private PluginManager(){
 		if(container==null)container = Web.plugins;
-		Map<String,Plugin> start_map =check_plugins();
-		log.info("Totally "+start_map.size()+" Plugin has is going to load.");
+		log.info("Totally "+container.size()+" Plugin  is going to load.");
 		init_plugin_folder();
-		pre_run(start_map);
+		pre_run();
 	}
 	
 	public  void check(){
@@ -129,12 +127,7 @@ public class PluginManager  extends Timer {
 	}
 	
 	
-	
-	
-	private Map<String,Plugin> check_plugins(){
-		Map<String,Plugin> start_map =Web.container.get_sub_cells_of(Plugin.class);
-		return start_map;
-	}
+
 	
 	/**
 	 * create plugin folder
@@ -151,15 +144,15 @@ public class PluginManager  extends Timer {
 		}
 	}
 	
-	public void pre_run(Map<String,Plugin> start_map){
+	public void pre_run(){
 		Plugin plugin;
 		boolean need_to_end=false;
 		Exception ex=null;
 		String plugin_name=null;
 		String cell_name=null;
 		List<Plugin> start_queue=new LinkedList<Plugin>();
-		List<String> start_keys=set_to_list(start_map.keySet());
-		if(start_map.size()>0){
+		List<String> start_keys=CollectionHelper.set_to_list(container.keySet());
+		if(container.size()>0){
 			log.info("..............................................................................");
 			log.info("\t\t\tReady to arrange Plugin module pre_run.");
 			log.info("..............................................................................");
@@ -167,7 +160,7 @@ public class PluginManager  extends Timer {
 		while(!need_to_end){
 			int s=start_keys.size();
 			for(int i=0;i<start_keys.size();){
-				plugin=start_map.get(start_keys.get(i));
+				plugin=container.get(start_keys.get(i));
 				try {
 					plugin_name=plugin.getClass().getName();
 					cell_name=start_keys.get(i);
@@ -180,26 +173,17 @@ public class PluginManager  extends Timer {
 				}
 				start_queue.add(plugin);
 				start_keys.remove(i);
-				container.put(cell_name,plugin);
 			}
 			if(start_keys.size()==0||start_keys.size()==s)need_to_end=true;
 			if(start_keys.size()>0&&need_to_end){
 				log.error("Lizar component Plugin "+plugin_name+" init failed, caused by:",ex);
 			}
 		}
-		Web.plugins=container;
 		run(start_queue);
 		clean_plugin_folder();
 	}
 	
-	private static <T> List<T> set_to_list(Set<T> set){
-		if(set==null)return null;
-		List<T> list=new ArrayList<T>();
-		for(T obj:set){
-			list.add(obj);
-		}
-		return list;
-	}
+	
 
 	private void clean_plugin_folder(){
 		File dir=new File(plugin_folder.getPath()+"/");

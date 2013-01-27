@@ -28,6 +28,7 @@ import com.lizar.web.controller.ContentType;
 import com.lizar.web.controller.Event;
 import com.lizar.web.controller.EventInterceptor;
 import com.lizar.web.controller.EventLoader;
+import com.lizar.web.controller.ExceptionRecorder;
 import com.lizar.web.controller.JSONHandler;
 import com.lizar.web.controller.JSONPHandler;
 import com.lizar.web.controller.StaticResource;
@@ -116,6 +117,8 @@ public class Controller{
 	
 	private static EventInterceptor int_cpt;
 	
+	private static ExceptionRecorder er;
+	
 	private static Controller controller;
 	
 	public static final String EVENT_DISABLE_FILE="/WEB-INF/lizar/disable_event.json";
@@ -154,13 +157,13 @@ public class Controller{
 		high_event_handler_map=new HashMap<String,Event>();
 		minor_event_handler_map=new HashMap<String,Event>();
 		disable_list=new JList();
-		Map<String,Event> start_map=check_events();
 		log.info("..............................................................................");
-		log.info("\t\t\tTotally "+start_map.size()+" Event is going to load.");
+		log.info("\t\t\tTotally "+event_map.size()+" Event is going to load.");
 		log.info("..............................................................................");
-		pre_handle(start_map);
+		pre_handle();
 		_init_tpl_vars();
 		_init_int_cpt();
+		_init_er();
 		_load_template_support(Config.xpath_str("template.class"),Config.xpath_list("template.listen"),Config.xpath_entity("template.params"));
 		ContentType.init();
 		static_src=StaticResource.instance(Web.context.getRealPath(""),Config.xpath_time("static_resource.delay_load"),Config.xpath_file_size("static_resource.file_max_size"),Config.xpath_int("static_resource.file_cache_min_uses"));
@@ -233,11 +236,6 @@ public class Controller{
 	
 	
 	
-	private Map<String,Event> check_events(){
-		Map<String,Event> start_map =Web.container.get_sub_cells_of(Event.class);
-		return start_map;
-	}
-	
 	public void _check_interceptor(String interceptor){
 		if(int_cpt==null){
 			if(StringHelper.isNotNull(interceptor)){
@@ -253,6 +251,24 @@ public class Controller{
 			_init_int_cpt(interceptor);	
 		}
 	}
+	
+	public void _check_exception_recorder(String exception_recorder){
+		if(er==null){
+			if(StringHelper.isNotNull(exception_recorder)){
+				_init_er(exception_recorder);
+			}
+			return;
+		}
+		if(StringHelper.isNull(exception_recorder)){
+			er=null;
+			return;
+		}
+		if(!int_cpt.getClass().getName().equals(exception_recorder)){
+			_init_er(exception_recorder);	
+		}
+	}
+	
+	
 	
 	public void _check_vars(JSON vars){
     	if(vars!=null){
@@ -323,8 +339,8 @@ public class Controller{
 		}
 	}
 	
-	private void pre_handle(Map<String,Event> start_map){
-		for(Entry<String,Event> e:start_map.entrySet()){
+	private void pre_handle(){
+		for(Entry<String,Event> e:event_map.entrySet()){
 			_express_event_listener(e.getKey(),e.getValue());
 		}
 		
@@ -337,6 +353,31 @@ public class Controller{
 	 * */
 	private void _init_int_cpt(){
 		_init_int_cpt(Config.xpath("event.interceptor",""));
+	}
+	
+	private void _init_er(String er){
+		if(StringHelper.isNotNull(er)){
+			Object obj=null;
+			try {
+				obj=Class.forName(er).newInstance();
+			} catch (Throwable e){
+				System.err.println(e);
+				return;
+			}
+			log.info("..............................................................................");
+			log.info("\t\t\tUse Exception Recorder "+er+" to record when there is an exception happen in event ");
+			log.info("..............................................................................");
+			if(obj!=null) this.er=(ExceptionRecorder)obj;
+		}
+	}
+	
+	/**
+	 * 
+	 * global Exception Recorder
+	 * 
+	 * */
+	private void _init_er(){
+		_init_er(Config.xpath("event.exception_recorder",""));
 	}
 	
 	/**
@@ -540,26 +581,43 @@ public class Controller{
 			el=new EventLoader( path,request, response);
 			request.setAttribute("com.lizar.web.controller.eventloader", el);
 		}else need_before=false;
-		if(int_cpt!=null&&need_before)int_cpt.before(el);
 		el.postfix(post_fix);
 		el.lan=request.getLocale().getLanguage();
-		if(StringHelper.isNotNull(post_fix)&&template!=null&&template.listen().indexOf(post_fix)!=-1){
-			template.handle(path,el);
+		if(int_cpt!=null&&need_before){
+			try{
+				int_cpt.before(el);
+			}catch(Exception e){
+				log.error(e);
+				if(er!=null)er.handle(el, e);
+			}
+		}
+		try{
+			handle_event(el);
+		}catch(Exception e){
+			log.error(e.getMessage(),e);
+			if(er!=null)er.handle(el, e);
+			handle_500(el);
+		}
+	}
+	
+	public void handle_event(EventLoader el)
+	throws Exception{
+		if(StringHelper.isNotNull(el.postfix())&&template!=null&&template.listen().indexOf(el.postfix())!=-1){
+			template.handle(el.request_path(),el);
 			if(int_cpt!=null&&el.need_after){
 				int_cpt.after(el);
 				el.need_after=false;
 			}
 			return;
 		}
-		Event event=seek_event_handler(path.toLowerCase());
+		Event event=seek_event_handler(el.request_path().toLowerCase());
 		if(event==null||!event.enable){
 			handle_404(el);
 		} else{
 			try{
-				_handle(event,path,el);
+				_handle(event,el.request_path(),el);
 			}catch(Exception e){
-				log.error("request:"+path+" throw a exception in "+event.getClass().getName(),e);
-				handle_500(el);
+				throw new Exception("request:"+el.request_path()+" throw a exception in "+event.getClass().getName());
 			}
 		}
 	}

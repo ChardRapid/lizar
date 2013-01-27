@@ -19,7 +19,10 @@ import com.lizar.log.Log;
 import com.lizar.log.Logger;
 import com.lizar.util.FileTool;
 import com.lizar.web.config.Config;
+import com.lizar.web.controller.Event;
 import com.lizar.web.loader.Cell;
+import com.lizar.web.loader.Module;
+import com.lizar.web.loader.Plugin;
 
 
 /**
@@ -85,6 +88,9 @@ public class Container {
 			}
 			start_list.add(b);
 			lizars.put(c.getName(), b);
+			if(b instanceof Plugin)Web.plugins.put(c.getName(), (Plugin)b);
+			if(b instanceof Event)Web.events.put(c.getName(), (Event)b);
+			if(b instanceof Module)Web.modules.put(c.getName(), (Module)b);
 		}
 		init_cells(start_list);
 	}

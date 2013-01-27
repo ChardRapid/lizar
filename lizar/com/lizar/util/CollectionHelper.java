@@ -2,20 +2,23 @@ package com.lizar.util;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 public class CollectionHelper {
 	
 	
-	public static void printMap(Map map){
-		Iterator itr=map.entrySet().iterator();
-		for(;itr.hasNext();){
-			Entry e=(Entry)itr.next();
-			System.out.println("key:"+e.getKey().toString()+"  value:"+e.getValue().toString());
+	public static <T> List<T> set_to_list(Set<T> set){
+		if(set==null)return null;
+		List<T> list=new ArrayList<T>();
+		for(T obj:set){
+			list.add(obj);
 		}
+		return list;
 	}
 	
 	public static void printList(List list,String propertyName){

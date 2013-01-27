@@ -18,6 +18,7 @@ import com.lizar.web.config.Group;
 import com.lizar.web.config.I18Msg;
 import com.lizar.web.config.Keys;
 import com.lizar.web.controller.Event;
+import com.lizar.web.loader.Module;
 import com.lizar.web.loader.Plugin;
 
 
@@ -46,6 +47,8 @@ public class Web extends HttpServlet{
     
     public static Map<String,Event> events;
     
+    public static Map<String,Module> modules;
+    
     public static Controller controller;
     
     public static PluginManager plugin_manager;
@@ -64,6 +67,7 @@ public class Web extends HttpServlet{
     
     public static boolean debug=false;
     
+    public static ModuleManager module_manager;
  
     
     public static <T> T get(Class<T> t){
@@ -110,6 +114,7 @@ public class Web extends HttpServlet{
 		log.info("Init Property.......");
 		plugins=new HashMap<String,Plugin>();
 		events=new HashMap<String,Event>();
+		modules=new HashMap<String,Module>();
 		cfg=Config.instance();						//load global system configuration
 		keys=Keys.instance();						//load cell configuration
 		group=Group.instance();						//load cell configuration
@@ -125,7 +130,7 @@ public class Web extends HttpServlet{
 		group.persistence();						//store group to file
 		i18.persistence();							//load msg from files
 		
-		
+		module_manager=ModuleManager.instance();
 		plugin_manager=PluginManager.instance();	//create all plugins and call pre_run()
 		controller=Controller.instance();
 		cfg.ready_to_check_changes();				//ready to check changes
