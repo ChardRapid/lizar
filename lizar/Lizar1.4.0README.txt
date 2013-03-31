@@ -1,0 +1,3 @@
+1 规范整个系统架构，采用full-control模式，关于full-control参见http://plaza1.duapp.com/?p=40 。系统采用分级管理机制，上一级组件管理下一级组件的生命周期，Web是系统中最高级组件统领整个系统。突出Web在整个架构中的大统领地位，Web启动/停止则会启动/停止系统所有组件，使整个系统整体行更强。框架引入生命周期概念，系统组件概念更强。
+2 重新设置了PluginManager管理的Plugin配置文件，从每个Plugin一个配置文件，改为所有Plugins共享一个配置文件/WEB-INF/lizar/plugins.json，和其他配置文件不同，此配置文件不能热配置。
+3 重构了PluginManager和org.lizar.config下的代码，使得lizar更优雅。
