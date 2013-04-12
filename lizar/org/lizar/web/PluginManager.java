@@ -294,7 +294,7 @@ public class PluginManager implements Lifecycle {
 			log.info(plugin.getClass().getName()+" has been cleaned up.");
 		}
 		container.clear();
-		if(scheduExec!=null)scheduExec.shutdown();
+		if(scheduExec!=null) scheduExec.shutdown();
 		started=false;
 		log.info("..............................................................................");
 	}

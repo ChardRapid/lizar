@@ -25,6 +25,7 @@ import org.lizar.web.Controller;
 import org.lizar.web.Lifecycle;
 import org.lizar.web.Web;
 import org.lizar.web.controller.ConfigManager;
+import org.lizar.web.controller.VelocitySupport;
 
 
 /**
@@ -324,8 +325,8 @@ public class Config implements Lifecycle{
 	}
 	
 	private void apply_event_changes(){
+		log.info("interceptor:"+xpath_str("event.interceptor", ""));
 		Web.controller._check_interceptor(xpath_str("event.interceptor", ""));
-//		Web.controller._check_default_event(xpath_str("event.default_event",""));
 		Web.controller._check_vars(xpath_entity("event.global_var"));
 		Web.controller._check_exception_recorder(xpath_str("event.exception_recorder", ""));
 	}
@@ -348,14 +349,19 @@ public class Config implements Lifecycle{
 	}
 	
 	private void check_template(JSON entity){
-		
 		JSON template=entity._entity("template");
 		if(template==null){
 			entity.put("template", org_config.get("template"));
 			return;
 		}
-		template.put("class",template._string("class", ""));
-		template.put("listen",template._list("listen"));
+		template.put("class",template._string("class", VelocitySupport.class.getName()));
+		JList listen=template._list("listen");
+		if(listen==null){
+			listen=new JList();
+			listen.add("vm");
+			listen.add("tpl");
+		}
+		template.put("listen",listen);
 		if(template._entity("params")==null)template.put("params",new JObject());
 		entity.put("template", template);
 		
@@ -693,8 +699,14 @@ public class Config implements Lifecycle{
 		if(template==null){
 			template=new JObject();
 		}
-		template.put("class",template._string("class", ""));
-		template.put("listen",template._list("listen"));
+		template.put("class",template._string("class", VelocitySupport.class.getName()));
+		JList listen=template._list("listen");
+		if(listen==null){
+			listen=new JList();
+			listen.add("vm");
+			listen.add("tpl");
+		}
+		template.put("listen",listen);
 		if(template._entity("params")==null)template.put("params",new JObject());
 		org_config.put("template", template);
 	}

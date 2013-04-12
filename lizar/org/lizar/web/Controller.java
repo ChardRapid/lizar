@@ -34,6 +34,7 @@ import org.lizar.web.controller.JSONHandler;
 import org.lizar.web.controller.JSONPHandler;
 import org.lizar.web.controller.StaticResource;
 import org.lizar.web.controller.TemplateSupport;
+import org.lizar.web.controller.VelocitySupport;
 import org.lizar.web.controller.XMLHandler;
 import org.lizar.web.loader.I18Resource;
 import org.lizar.web.Lifecycle;

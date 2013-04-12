@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.lizar.json.util.JSONParser;
+import org.lizar.util.StringHelper;
 
 
 /**
@@ -241,8 +242,8 @@ public class JObject  extends LinkedHashMap<String,Object> implements JSON {
 
 	public String _string(String name,String _default) {
 		Object o=get(name);
-		if(o!=null)return (String)o;
-		return _default;
+		if(o==null||StringHelper.isNull(o.toString()))return _default;
+		return o.toString();
 	}
 	
 	public <T> T get(String name,T t){

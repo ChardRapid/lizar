@@ -11,7 +11,6 @@ public class ConfigManager extends Event {
 	public static String password="";
 	
 	
-	@Override
 	public void init_property() throws Exception {
 		// TODO Auto-generated method stub
 		
