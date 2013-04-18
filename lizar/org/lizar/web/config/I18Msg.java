@@ -238,22 +238,21 @@ public class I18Msg {
         try {
         	reader = new BufferedReader(new InputStreamReader(new FileInputStream(_f),"utf-8"));
             String tempString = null;
-            int i=0;
+            int i=1;
             String[] arr=null;
-            
+            int comment=0;
             while ((tempString = reader.readLine()) != null) {
-            	if(!tempString.trim().equals("")&&!tempString.trim().startsWith("#")){
-        			arr=tempString.split("=");
-        			if(arr.length>2){
-        				System.err.println("Muti-Language read line "+i+" error in "+_f.getName()+" file. this line get more than one '='.");
-        			}else if(arr.length==2){
-        				res.put(arr[0], arr[1]);
-        			}else{
-        				log.info("msg:"+tempString+" is not a void  <key=value> format in "+_f.getPath());
-        			}
-        			i++;
-        		}
-                
+            	comment=tempString.indexOf("#");
+            	if(comment==0||comment==1)continue;
+            	if(comment!=-1)tempString=tempString.substring(0, comment);
+            	if(tempString.indexOf("=")==-1)continue;
+            	arr=tempString.split("=");
+    			if(arr.length!=2){
+    				System.err.println("Muti-Language read line "+i+" error in "+_f.getName()+" file. this line get more than one '='.");
+    			}else if(arr.length==2){
+    				res.put(arr[0], arr[1]);
+    			}
+    			i++;
             }
             reader.close();
         } catch (IOException e) {
@@ -275,22 +274,28 @@ public class I18Msg {
 
 	
 	private void  update(I18Resource i18){
+		log.info("I18 going to upload resource file:"+i18.file.getName());
 		BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new FileReader(i18.file));
+        	InputStreamReader read = new InputStreamReader( new FileInputStream(i18.file),"utf-8");
+            reader = new BufferedReader(read);
             String tempString = null;
-            int i=0;
+            int i=1;
             String[] arr=null;
+            int comment=0;
             while ((tempString = reader.readLine()) != null) {
-            	if(!tempString.trim().equals("")){
-        			arr=tempString.split("=");
-        			if(arr.length>2){
-        				System.err.println("Muti-Language read line "+i+" error in "+i18.file.getName()+" file. this line get more than one '='.");
-        			}else{
-        				i18.map.put(arr[0], arr[1]);
-        			}
-        			i++;
-        		}
+            	comment=tempString.indexOf("#");
+            	if(comment==0||comment==1)continue;
+            	if(tempString.indexOf("=")==-1)continue;
+            	if(comment!=-1)tempString=tempString.substring(0, comment);
+            	arr=tempString.split("=");
+    			if(arr.length!=2){
+    				System.out.println(tempString);
+    				System.err.println("Muti-Language read line "+i+" error in "+i18.file.getName()+" file. this line get more than one '='.");
+    			}else{
+    				i18.map.put(arr[0], arr[1]);
+    			}
+    			i++;
             }
             reader.close();
         } catch (IOException e) {
@@ -309,76 +314,76 @@ public class I18Msg {
 	public void check() throws IOException{
 		var=Config.xpath_str("muti_language.var");
 		File l=new File(DIR);
-		if(l.isFile()){
-			FileTool.check_dir(l);
-			l=new File(Config.path_filter(DIR+"/i18.txt"));
-			if(!l.exists()){
-				FileTool.write_to_file( "#this is default locale i18 msg file, you can name different locale as i18.en.txt",l);
-			}
-			return;
+		FileTool.check_dir(l);
+		File[] f_arr=l.listFiles();
+		if(f_arr==null||f_arr.length==0){
+			FileTool.write_to_file("#this is default locale i18 msg file, you can name different locale as i18.en.txt", new File(l.getPath()+"/i18.txt"));
+			f_arr=l.listFiles();
 		}
-		if(l.exists()){
-			File[] f_arr=l.listFiles();
-			I18Resource ir;
-			List<I18Resource> modify_list=new LinkedList<I18Resource>();
-			for(File _f:f_arr){
-				String name=_f.getName().toLowerCase();
-				if(_f.isFile()&&name.startsWith("i18.")&&name.endsWith(".txt")){
-					if(name.equals("i18.txt")){
-						if(_default.file.lastModified()!=_default.last_modify){
-							update(_default);
-							modify_list.add(_default);
-						}
-						continue;
+		check_new(f_arr);
+	}
+	
+	private void check_new(File[] f_arr){
+		I18Resource ir;
+		List<I18Resource> modify_list=new LinkedList<I18Resource>();
+		for(File _f:f_arr){
+			String name=_f.getName().toLowerCase();
+			if(is_valid_res_file(_f)){
+				if(name.equals("i18.txt")){
+					if(_default.file.lastModified()!=_default.last_modify){
+						update(_default);
+						modify_list.add(_default);
 					}
-					String lan=name.substring(4,name.length()-4);
-					if(lan.equals("")||lan.indexOf(".")!=-1){
-						log.error("Muti-Language load failed msg file must in fixed format : msg.txt\nmsg.zh.txt\n a format like this (msg..txt) or (msg.zh..txt) is not support");
-						continue;
-					}
-					if(_f.canRead()){
-						if(lan.equals(Config.xpath("muti_language.default_locale"))){
-							if(_default!=null){
-								if(StringHelper.equals(_default.file, _f.getPath())){
-									if(_default.file.lastModified()!=_default.last_modify){
-										update(_default);
-										modify_list.add(_default);
-									}
-								}else{
-									log.warn("Default locale "+_default.file.getPath()+" has been droped, and set "+_f.getPath()+" as default locale file.");
-									_default=_load(_f);
-									modify_list.add(_default);
-								}
-							}else{
-								_default=_load(_f);
+					continue;
+				}
+				String lan=name.substring(4,name.length()-4);
+				if(lan.equals("")||lan.indexOf(".")!=-1){
+					log.error("Muti-Language load failed msg file must in fixed format : msg.txt\nmsg.zh.txt\n a format like this (msg..txt) or (msg.zh..txt) is not support");
+					continue;
+				}
+				if(!_f.canRead()){
+					log.error("Muti-Language load msg from "+_f.getName()+" failed. caused by the file cannot be able to read by the application");
+					continue;
+				}
+				if(lan.equals(Config.xpath("muti_language.default_locale"))){
+					if(_default!=null){
+						if(StringHelper.equals(_default.file, _f.getPath())){
+							if(_default.file.lastModified()!=_default.last_modify){
+								update(_default);
 								modify_list.add(_default);
 							}
 						}else{
-							ir=res.get(lan);
-							if(ir==null){
-								ir= _load(_f);
-								ir.lan=lan;
-								res.put(lan,ir);
-								modify_list.add(res.get(lan));
-							}else {
-								if(ir.file.lastModified()!=ir.last_modify){
-									update(ir);
-									modify_list.add(ir);
-								}
-							}
+							log.warn("Default locale "+_default.file.getPath()+" has been droped, and set "+_f.getPath()+" as default locale file.");
+							_default=_load(_f);
+							modify_list.add(_default);
 						}
 					}else{
-						log.error("Muti-Language load msg from "+_f.getName()+" failed. caused by the file cannot be able to read by the application");
+						_default=_load(_f);
+						modify_list.add(_default);
+					}
+					continue;
+				}
+				ir=res.get(lan);
+				if(ir==null){
+					ir= _load(_f);
+					ir.lan=lan;
+					res.put(lan,ir);
+					modify_list.add(res.get(lan));
+				}else {
+					if(ir.file.lastModified()!=ir.last_modify){
+						update(ir);
+						modify_list.add(ir);
 					}
 				}
 			}
-			translate(modify_list);
-		}else{
-			l.mkdirs();
-			return;
 		}
-		
-		
+		translate(modify_list);
+	}
+	
+	private boolean is_valid_res_file(File _f){
+		String name=_f.getName().toLowerCase();
+		if(_f.isFile()&&name.startsWith("i18.")&&name.endsWith(".txt"))return true;
+		return false;
 	}
 	
 	public String get(String lan,String key){

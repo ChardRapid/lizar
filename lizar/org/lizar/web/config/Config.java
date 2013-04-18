@@ -156,6 +156,7 @@ public class Config implements Lifecycle{
 				} catch (InterruptedException e) {
 					log.debug("config checker sleep  has been interrupted as the thread is going to close.");
 				}
+				
 				while(started){
 					if(ready){
 						if(!file.exists()){
@@ -215,6 +216,7 @@ public class Config implements Lifecycle{
 								log.debug("config checker sleep  has been interrupted as the thread is going to close.");
 							}
 						}
+						
 //						try{
 //							Web.plugin_manager.check();
 //						}catch(Exception e){
